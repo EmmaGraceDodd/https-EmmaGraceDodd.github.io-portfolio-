@@ -118,12 +118,12 @@ export const projects: Project[] = [
     approachTitle: "How I played with it.",
     approach:
       "I played around with bold colors, quirky illustrations, nostalgic photography, and a little bit of everything I love about design. I wanted Roundbird to feel like the kind of place you stop in for a quick coffee and somehow end up staying for hours.",
-    outcome: "Coffee by day, wine by night, and one little bird on everything.",
+    outcome: "",
     role: "Logo, illustration, pattern, photography, and social",
     channels: "Brand identity, packaging, merch, and social",
     note: "Personal concept project. Not affiliated with the original Roundbird.",
     cover: { src: media("rb-closeup.webp"), alt: "Hands holding a coffee cup with the Roundbird bird mark" },
-    hero: [{ src: media("rb-closeup.webp"), alt: "Hands holding a coffee cup with the Roundbird bird mark" }],
+    hero: [{ src: media("rb-social-hero.png"), alt: "Two Roundbird social post mockups" }],
     featured: true,
     className: "project-card--roundbird",
     palette: [
@@ -306,7 +306,7 @@ export const projects: Project[] = [
         layout: "scroll",
         src: media("web-mobile-wallet.webp"),
         alt: "Full mobile wallet landing page",
-        caption: "Mobile wallet page",
+        caption: "",
         group: [
           { src: media("web-mobile-wallet.webp"), alt: "Full mobile wallet landing page" },
           { src: media("web-uad.webp"), alt: "Full UAD 3.6 appraisal transition page" },
@@ -327,7 +327,7 @@ export const projects: Project[] = [
         layout: "right",
         src: media("web-faq.webp"),
         alt: "Business account FAQ section on the bank website",
-        caption: "FAQs written around real customer questions",
+        caption: "FAQs I built out for AEO visibility",
       },
     ],
   },

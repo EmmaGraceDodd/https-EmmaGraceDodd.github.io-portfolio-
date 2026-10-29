@@ -2527,7 +2527,7 @@ footer > .eyebrow {
   background: var(--blue-light);
   border-block: 1px solid var(--ink);
   display: grid;
-  gap: 5rem;
+  gap: 4rem;
   padding: 5rem 6vw 6rem;
 }
 
@@ -2551,20 +2551,25 @@ footer > .eyebrow {
   order: 2;
 }
 
-.tm-folder-num {
+.tm-folder-label {
   display: block;
-  font-family: var(--display);
-  font-size: 2.4rem;
-  line-height: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
 }
+
+.tm-folder-copy { padding-block: 1rem; }
 
 .tm-folder-copy h2 {
   font-family: var(--display);
   font-size: clamp(1.9rem, 3.1vw, 2.9rem);
   font-weight: 500;
   letter-spacing: -0.045em;
-  line-height: 1;
-  margin: 0.4rem 0 0.75rem;
+  line-height: 1.1;
+  margin: 0 0 1rem;
 }
 
 .tm-folder-copy p {
@@ -2633,6 +2638,9 @@ footer > .eyebrow {
 
 /* the mockups stack, then rise out of the pocket and grow */
 .tm-piece {
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
   border: 1px solid var(--ink);
   border-radius: 1.1rem;
   bottom: 0;
@@ -2668,8 +2676,9 @@ footer > .eyebrow {
   font-size: 0.85rem;
   font-weight: 600;
   left: 50%;
-  letter-spacing: 0.22em;
-  padding: 0.55rem 1.6rem;
+  letter-spacing: 0.1em;
+  padding: 0.55rem 1rem;
+  white-space: nowrap;
   position: absolute;
   text-transform: uppercase;
   top: 40%;
@@ -2696,13 +2705,14 @@ footer > .eyebrow {
   }
 
   .tm-work {
-    gap: 3.5rem;
+    gap: 3rem;
     padding: 3.5rem 1.25rem 4.5rem;
   }
 
   .tm-folder,
   .tm-folder:nth-child(odd) {
     grid-template-columns: 1fr;
+    row-gap: 0.75rem;
   }
 
   .tm-folder:nth-child(odd) .tm-folder-copy {
@@ -2832,7 +2842,7 @@ footer > .eyebrow {
 
 .bubble--one {
   left: 5vw;
-  top: 7.5rem;
+  top: 5.5rem;
 }
 
 .bubble--two {
@@ -2879,6 +2889,8 @@ footer > .eyebrow {
   position: relative;
   transform-origin: 50% 0;
 }
+
+.badge-react { position: relative; pointer-events: auto; transform-origin: 50% 0; }
 
 .badge-holder-img {
   display: block;
@@ -3301,4 +3313,30 @@ footer > .eyebrow {
   .notebook {
     transform: rotate(-1.5deg);
   }
+}
+.tm-piece img { display: block; width: 100%; height: auto; border-radius: inherit; }
+.tm-folder-front, .tm-folder-back { pointer-events: none; }
+.tm-piece:focus-visible { outline: 3px solid #8a25bd; outline-offset: 5px; }
+.image-viewer { width: min(96vw, 90rem); max-width: none; max-height: 95svh; padding: 1rem; border: 0; border-radius: .8rem; background: #fff8ef; color: #2d104e; }
+.image-viewer::backdrop { background: rgba(20, 8, 34, .88); }
+.image-viewer > img { display: block; max-width: 100%; width: auto; max-height: 80svh; height: auto; object-fit: contain; margin: auto; }
+.image-viewer-toolbar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.image-viewer-toolbar button { padding: .65rem 1rem; border: 1px solid currentColor; border-radius: 2rem; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.image-viewer-close { margin-left: auto; }
+.image-viewer button:focus-visible { outline: 3px solid #8a25bd; outline-offset: 3px; }
+/* Keep text in its original reading column after removing eyebrow labels. */
+.case-summary, .case-outcome > p:last-child { grid-column: 2; min-width: 0; }
+.case-hero h1, .tm-hero h1, .case-story h2 { line-height: 1.05; overflow: visible; }
+h1, h2, h3 { text-wrap: balance; }
+p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: pretty; }
+.case-intro, .case-outcome { grid-template-columns: minmax(0, .45fr) minmax(0, 1.55fr); }
+.case-details { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, .6fr); }
+.case-details > div, .case-story article, .tm-hero-text { min-width: 0; }
+.tm-hero h1 { font-size: clamp(3.2rem, 6.2vw, 7rem); letter-spacing: -.055em; }
+.tm-piece:nth-child(2) { left: 14%; }
+@media (max-width: 900px) {
+  .case-intro, .case-outcome { grid-template-columns: minmax(0, 1fr); }
+  .case-summary, .case-outcome > p:last-child { grid-column: 1; }
+  .case-details { grid-template-columns: minmax(0, 1fr); }
+  .tm-hero h1 { font-size: clamp(3.1rem, 12vw, 5rem); }
 }

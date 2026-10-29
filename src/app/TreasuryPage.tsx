@@ -1,8 +1,9 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react"
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react"
 import { Link } from "react-router"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow } from "./Media"
+import { ImageViewer } from "./ImageViewer"
 import { useTextMotion } from "./motion"
 import { media, type Project } from "./projectData"
 
@@ -30,7 +31,7 @@ type Folder = {
 const folders: Folder[] = [
   {
     id: "mail",
-    label: "Mail",
+    label: "Direct mailer",
     title: "A tooth-shaped mailer",
     line: "Sent to dental offices: “Let’s get to the root of your banking fees.”",
     pieces: [{ src: "tm-tooth.webp", alt: "Front and back of the tooth-shaped mailer" }],
@@ -47,7 +48,7 @@ const folders: Folder[] = [
   },
   {
     id: "print",
-    label: "Print",
+    label: "Print ads",
     title: "Fees hiding below the surface",
     line: "Ads in the Gainesville Sun and The Independent Florida Alligator.",
     pieces: [
@@ -57,7 +58,7 @@ const folders: Folder[] = [
   },
   {
     id: "web",
-    label: "Web",
+    label: "Landing pages",
     title: "The sign-up page",
     line: "Where every ad and mailer sent people to book a free fee review.",
     pieces: [
@@ -70,6 +71,8 @@ const folders: Folder[] = [
 
 export default function TreasuryPage({ project, next }: { project: Project; next: Project }) {
   const root = useRef<HTMLElement>(null)
+  const [viewer, setViewer] = useState<{ items: { src: string; alt: string }[]; start: number } | null>(null)
+  const openImage = (folder: Folder, start: number) => setViewer({ items: folder.pieces.map((piece) => ({ ...piece, src: media(piece.src) })), start })
 
   useLayoutEffect(() => {
     const ctx = gsap.context((self) => {
@@ -125,9 +128,9 @@ export default function TreasuryPage({ project, next }: { project: Project; next
             ease: "power3.out",
             scrollTrigger: { trigger: folder, start: "top 78%" },
           })
-          gsap.from([back, front], {
-            y: 80,
-            autoAlpha: 0,
+          gsap.fromTo([back, front], { y: 80, autoAlpha: 0 }, {
+            y: 0,
+            autoAlpha: 1,
             duration: 0.7,
             ease: "power3.out",
             scrollTrigger: { trigger: folder, start: "top 80%" },
@@ -139,7 +142,7 @@ export default function TreasuryPage({ project, next }: { project: Project; next
           pieces.forEach((piece, i) => {
             tl.fromTo(
               piece,
-              { yPercent: 30, scale: 0.62, autoAlpha: 0, rotate: 0 },
+              { x: 0, y: 0, yPercent: 30, scale: 0.62, autoAlpha: 0, rotate: 0 },
               { yPercent: -30, scale: 1, autoAlpha: 1, rotate: i === 0 ? -2.5 : 3.5, ease: "power2.out", duration: 0.7 },
               i * 0.22,
             )
@@ -233,11 +236,10 @@ export default function TreasuryPage({ project, next }: { project: Project; next
       </section>
 
       <section className="tm-work" aria-label="The campaign pieces">
-        <p className="eyebrow tm-work-eyebrow">What came out of it</p>
-        {folders.map((folder, i) => (
+        {folders.map((folder) => (
           <article className={`tm-folder tm-folder--${folder.id}`} key={folder.id}>
             <div className="tm-folder-copy">
-              <span className="tm-folder-num">{String(i + 1).padStart(2, "0")}</span>
+              <span className="tm-folder-label">{folder.label}</span>
               <h2 data-split="lines">{folder.title}</h2>
               <p>{folder.line}</p>
             </div>
@@ -247,8 +249,10 @@ export default function TreasuryPage({ project, next }: { project: Project; next
                 <span className="tm-folder-tabshape" />
               </div>
               <div className="tm-pieces">
-                {folder.pieces.map((piece) => (
-                  <img className="tm-piece" src={media(piece.src)} alt={piece.alt} key={piece.src} />
+                {folder.pieces.map((piece, index) => (
+                  <button type="button" className="tm-piece" onClick={() => openImage(folder, index)} aria-label={`Enlarge: ${piece.alt}`} key={piece.src}>
+                    <img src={media(piece.src)} alt={piece.alt} />
+                  </button>
                 ))}
               </div>
               <div className="tm-folder-front" aria-hidden="true">
@@ -264,6 +268,7 @@ export default function TreasuryPage({ project, next }: { project: Project; next
         <strong data-split="words">{next.shortTitle}</strong>
         <Arrow />
       </Link>
+      {viewer && <ImageViewer items={viewer.items} start={viewer.start} onClose={() => setViewer(null)} />}
     </main>
   )
 }

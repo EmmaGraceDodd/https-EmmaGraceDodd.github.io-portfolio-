@@ -5,6 +5,7 @@ import { useTextMotion } from "./motion"
 import { getProject, projects, type GalleryItem } from "./projectData"
 // The Treasury page brings in GSAP, so it only loads when someone opens it.
 const TreasuryPage = lazy(() => import("./TreasuryPage"))
+const RoundbirdPage = lazy(() => import("./RoundbirdPage"))
 
 function GalleryFigure({ item, index }: { item: GalleryItem; index: number }) {
   const pieces = item.group ?? [item]
@@ -35,11 +36,11 @@ function GalleryFigure({ item, index }: { item: GalleryItem; index: number }) {
           ),
         )}
       </div>
-      <figcaption>
+      {(item.caption || isScroll) && <figcaption>
         <span>{String(index + 1).padStart(2, "0")}</span>
         {item.caption}
         {isScroll && <em className="scroll-hint">Hover or scroll inside the page</em>}
-      </figcaption>
+      </figcaption>}
     </figure>
   )
 }
@@ -74,6 +75,9 @@ function ProjectView() {
   const projectIndex = projects.findIndex((item) => item.slug === project.slug)
   const nextProject = projects[(projectIndex + 1) % projects.length]
 
+  if (project.slug === "roundbird-coffee")
+    return <Suspense fallback={<main className="rb-page" />}><RoundbirdPage project={project} next={nextProject} /></Suspense>
+
   if (project.slug === "fee-advantage-review")
     return (
       <Suspense fallback={<main className="case-page tm-page" />}>
@@ -101,10 +105,6 @@ function ProjectView() {
             </span>
           ))}
         </h1>
-        <div className="case-hero-meta">
-          <p>{project.category}</p>
-          <p>{project.role}</p>
-        </div>
         <div className={`case-hero-image case-hero-image--${project.hero.length}`}>
           {project.hero.map((item) => (
             <Media item={item} key={item.src} eager />
@@ -113,11 +113,10 @@ function ProjectView() {
       </section>
 
       <section className="case-intro">
-        <p className="eyebrow">The quick version</p>
         <p className="case-summary" data-split="lines">{project.summary}</p>
         <dl className="case-details">
           <div>
-            <dt>What I did</dt>
+            <dt>My role</dt>
             <dd>{project.role}</dd>
           </div>
           <div>
@@ -134,7 +133,6 @@ function ProjectView() {
 
       {project.metrics && (
         <section className="metrics-section">
-          <p className="eyebrow">The results</p>
           <div className="metrics-grid">
             {project.metrics.map((metric) => (
               <div key={metric.label} className="reveal">
@@ -149,13 +147,11 @@ function ProjectView() {
       <section className="case-story">
         <article>
           <p className="story-number">01</p>
-          <p className="eyebrow">The starting point</p>
           <h2 data-split="lines">{project.challengeTitle}</h2>
           <p>{project.challenge}</p>
         </article>
         <article>
           <p className="story-number">02</p>
-          <p className="eyebrow">What I made</p>
           <h2 data-split="lines">{project.approachTitle}</h2>
           <p>{project.approach}</p>
         </article>
@@ -164,7 +160,6 @@ function ProjectView() {
 
       {(project.palette || project.marks) && (
         <section className="brand-section">
-          <p className="eyebrow">The brand</p>
           {project.marks && (
             <div className="brand-marks">
               {project.marks.map((mark) => (
@@ -197,9 +192,8 @@ function ProjectView() {
         ))}
       </section>
 
-      <section className="case-outcome">
-        <p className="eyebrow">How it turned out</p>
-        <p data-split="lines">{project.outcome}</p>
+      <section className="case-outcome" aria-label="Project outcome">
+        <p>{project.outcome}</p>
       </section>
 
       <Link className="next-project" to={`/work/${nextProject.slug}`}>

@@ -56,7 +56,6 @@ function ProjectCard({ project }: { project: Project }) {
             ))}
           </span>
           <span className="project-info">
-            <span>{project.category}</span>
             <span>{project.year}</span>
           </span>
         </span>
@@ -74,40 +73,64 @@ export function Home() {
   useLayoutEffect(() => {
     const hero = heroRef.current
     if (!hero) return
+    const mm = gsap.matchMedia()
+    const drags: Draggable[] = []
     const ctx = gsap.context(() => {
-      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      const bubbles = gsap.utils.toArray<HTMLElement>(".bubble", hero)
+      // Draggable owns only the outer position. Entrance/float effects belong
+      // to the inner label so drag initialization cannot capture scale zero.
+      bubbles.forEach((bubble) => {
+        gsap.set(bubble, { scale: 1, autoAlpha: 1 })
+        drags.push(...Draggable.create(bubble, { bounds: hero, inertia: false, zIndexBoost: true }))
+      })
 
-      // the badge drops in on its lanyard, then swings gently
-      const swing = hero.querySelector(".badge-swing")
-      if (!still && swing) {
-        gsap.from(swing, { yPercent: -60, rotate: 9, duration: 1.6, ease: "elastic.out(1, 0.45)", delay: 0.2 })
-        gsap.to(swing, { rotate: 2.2, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.8 })
-        // it leans toward the cursor a little
-        const lean = gsap.quickTo(".badge-holder", "rotate", { duration: 1.2, ease: "elastic.out(1, 0.4)" })
-        const onMove = (e: PointerEvent) => {
-          const r = hero.getBoundingClientRect()
-          lean(((e.clientX - r.left) / r.width - 0.5) * 8)
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const swing = hero.querySelector(".badge-swing")
+        const reaction = hero.querySelector<HTMLElement>(".badge-react")
+        if (swing) {
+          gsap.fromTo(swing, { yPercent: -60, rotate: 9 }, { yPercent: 0, rotate: 0, duration: 1.6, ease: "elastic.out(1, 0.45)", delay: 0.2 })
+          gsap.to(swing, { rotate: 2.2, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.8 })
         }
-        hero.addEventListener("pointermove", onMove)
-        hero.addEventListener("pointerleave", () => lean(0))
-      }
-
-      // the bubbles float, and you can drag them
-      gsap.utils.toArray<HTMLElement>(".bubble", hero).forEach((b, i) => {
-        if (!still) {
-          gsap.from(b, { scale: 0, autoAlpha: 0, duration: 0.9, ease: "back.out(2)", delay: 0.9 + i * 0.18 })
-          gsap.to(b.firstElementChild, {
+        bubbles.forEach((bubble, i) => {
+          gsap.fromTo(bubble.firstElementChild, { scale: 0.8, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.9, ease: "back.out(2)", delay: 0.6 + i * 0.18 })
+          gsap.to(bubble.firstElementChild, {
             y: i % 2 ? 10 : -10,
             duration: 2.4 + i * 0.5,
             ease: "sine.inOut",
             yoyo: true,
             repeat: -1,
           })
+        })
+        if (!reaction) return
+        const rotateTo = gsap.quickTo(reaction, "rotation", { duration: 0.3, ease: "power2.out" })
+        const shiftTo = gsap.quickTo(reaction, "x", { duration: 0.3, ease: "power2.out" })
+        const settle = gsap.to(reaction, { rotation: 0, x: 0, duration: 1.8, ease: "elastic.out(1, 0.35)", paused: true })
+        let previousX: number | null = null
+        const onMove = (event: PointerEvent) => {
+          if (event.pointerType !== "mouse") return
+          settle.pause()
+          const rect = reaction.getBoundingClientRect()
+          const velocity = previousX === null ? 0 : event.clientX - previousX
+          previousX = event.clientX
+          const push = gsap.utils.clamp(-12, 12, ((event.clientX - rect.left) / rect.width - 0.5) * 16 + velocity * 0.2)
+          rotateTo(push)
+          shiftTo(push * 0.5)
         }
-        Draggable.create(b, { bounds: hero, inertia: false, zIndexBoost: true })
+        const onLeave = () => {
+          previousX = null
+          rotateTo.tween.pause()
+          shiftTo.tween.pause()
+          settle.invalidate().restart()
+        }
+        reaction.addEventListener("pointermove", onMove)
+        reaction.addEventListener("pointerleave", onLeave)
+        return () => {
+          reaction.removeEventListener("pointermove", onMove)
+          reaction.removeEventListener("pointerleave", onLeave)
+        }
       })
     }, hero)
-    return () => ctx.revert()
+    return () => { mm.revert(); drags.forEach((drag) => drag.kill()); ctx.revert() }
   }, [])
 
   useEffect(() => {
@@ -173,6 +196,7 @@ export function Home() {
 
         <div className="badge-rig" aria-label="Emma's work badge: Florida Capital Bank, Marketing Coordinator">
           <div className="badge-swing">
+            <div className="badge-react">
             <span className="badge-strap" aria-hidden="true" />
             <div className="badge-holder">
               <img className="badge-holder-img" src={media("prop-badge.webp")} alt="" aria-hidden="true" />
@@ -186,6 +210,7 @@ export function Home() {
                 <span className="badge-barcode" aria-hidden="true" />
               </div>
               <span className="badge-gloss" aria-hidden="true" />
+            </div>
             </div>
           </div>
         </div>
@@ -252,7 +277,7 @@ export function Home() {
                   <span className="project-number-small">{project.number}</span>
                   <strong>{project.shortTitle}</strong>
                   <span className="more-card-category">
-                    {project.category} · {project.year}
+                    {project.year}
                   </span>
                 </span>
                 <span className="project-open">
@@ -292,7 +317,6 @@ export function Home() {
         </div>
 
         <div className="about-side">
-          <p className="eyebrow">About me</p>
           <h2 data-split="lines">
             A little
             <span>about me.</span>
