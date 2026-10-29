@@ -1,7 +1,10 @@
-import { useEffect } from "react"
+import { Suspense, lazy, useEffect, useRef } from "react"
 import { Link, Navigate, useParams } from "react-router"
 import { Arrow, Media, useReveal } from "./Media"
+import { useTextMotion } from "./motion"
 import { getProject, projects, type GalleryItem } from "./projectData"
+// The Treasury page brings in GSAP, so it only loads when someone opens it.
+const TreasuryPage = lazy(() => import("./TreasuryPage"))
 
 function GalleryFigure({ item, index }: { item: GalleryItem; index: number }) {
   const pieces = item.group ?? [item]
@@ -41,10 +44,19 @@ function GalleryFigure({ item, index }: { item: GalleryItem; index: number }) {
   )
 }
 
+/* Each project gets a fresh page. The text animations rearrange the words on
+   the page, so reusing the old page for a new project crashes React. */
 export function ProjectPage() {
   const { slug } = useParams()
+  return <ProjectView key={slug} />
+}
+
+function ProjectView() {
+  const { slug } = useParams()
   const project = getProject(slug)
+  const pageRef = useRef<HTMLElement>(null)
   useReveal(slug)
+  useTextMotion(pageRef, slug)
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" })
@@ -62,8 +74,15 @@ export function ProjectPage() {
   const projectIndex = projects.findIndex((item) => item.slug === project.slug)
   const nextProject = projects[(projectIndex + 1) % projects.length]
 
+  if (project.slug === "fee-advantage-review")
+    return (
+      <Suspense fallback={<main className="case-page tm-page" />}>
+        <TreasuryPage project={project} next={nextProject} key={project.slug} />
+      </Suspense>
+    )
+
   return (
-    <main className={`case-page case-page--${project.slug}`}>
+    <main className={`case-page case-page--${project.slug}`} ref={pageRef}>
       <header className="case-header">
         <Link className="case-back" to={{ pathname: "/", hash: "#work" }}>
           <span>Back to all work</span>
@@ -75,9 +94,11 @@ export function ProjectPage() {
         <p className="eyebrow">
           Project {project.number} · {project.year}
         </p>
-        <h1>
-          {project.title.split("\n").map((line) => (
-            <span key={line}>{line}</span>
+        <h1 data-split="lines" data-split-now>
+          {project.title.split("\n").map((line, i) => (
+            <span key={line} className={i === 1 ? "h1-accent" : undefined}>
+              {line}
+            </span>
           ))}
         </h1>
         <div className="case-hero-meta">
@@ -93,7 +114,7 @@ export function ProjectPage() {
 
       <section className="case-intro">
         <p className="eyebrow">The quick version</p>
-        <p className="case-summary">{project.summary}</p>
+        <p className="case-summary" data-split="lines">{project.summary}</p>
         <dl className="case-details">
           <div>
             <dt>What I did</dt>
@@ -111,34 +132,35 @@ export function ProjectPage() {
         {project.note && <p className="case-note">{project.note}</p>}
       </section>
 
-      <section className="case-story">
-        <article>
-          <p className="story-number">01</p>
-          <p className="eyebrow">The starting point</p>
-          <h2>{project.challengeTitle}</h2>
-          <p>{project.challenge}</p>
-        </article>
-        <article>
-          <p className="story-number">02</p>
-          <p className="eyebrow">What I made</p>
-          <h2>{project.approachTitle}</h2>
-          <p>{project.approach}</p>
-        </article>
-      </section>
-
       {project.metrics && (
         <section className="metrics-section">
-          <p className="eyebrow">The numbers</p>
+          <p className="eyebrow">The results</p>
           <div className="metrics-grid">
             {project.metrics.map((metric) => (
               <div key={metric.label} className="reveal">
-                <strong>{metric.value}</strong>
+                <strong data-count>{metric.value}</strong>
                 <span>{metric.label}</span>
               </div>
             ))}
           </div>
         </section>
       )}
+
+      <section className="case-story">
+        <article>
+          <p className="story-number">01</p>
+          <p className="eyebrow">The starting point</p>
+          <h2 data-split="lines">{project.challengeTitle}</h2>
+          <p>{project.challenge}</p>
+        </article>
+        <article>
+          <p className="story-number">02</p>
+          <p className="eyebrow">What I made</p>
+          <h2 data-split="lines">{project.approachTitle}</h2>
+          <p>{project.approach}</p>
+        </article>
+      </section>
+
 
       {(project.palette || project.marks) && (
         <section className="brand-section">
@@ -177,12 +199,12 @@ export function ProjectPage() {
 
       <section className="case-outcome">
         <p className="eyebrow">How it turned out</p>
-        <p>{project.outcome}</p>
+        <p data-split="lines">{project.outcome}</p>
       </section>
 
       <Link className="next-project" to={`/work/${nextProject.slug}`}>
         <span className="eyebrow">Keep looking</span>
-        <strong>{nextProject.shortTitle}</strong>
+        <strong data-split="words">{nextProject.shortTitle}</strong>
         <Arrow />
       </Link>
     </main>

@@ -7,4 +7,6 @@ import tailwindcss from "@tailwindcss/vite"
 export default defineConfig({
   base: process.env.BASE_PATH || "/",
   plugins: [react(), tailwindcss()],
+  // The private Claude preview needs everything in one script file.
+  build: process.env.VITE_PREVIEW ? { rollupOptions: { output: { inlineDynamicImports: true } } } : {},
 })

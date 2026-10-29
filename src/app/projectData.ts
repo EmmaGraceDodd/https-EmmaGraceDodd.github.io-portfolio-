@@ -41,6 +41,8 @@ export type Project = {
   cover: MediaItem
   hero: MediaItem[]
   className: string
+  /** false = shown in the smaller "More things I've made" section */
+  featured: boolean
   metrics?: Array<{ value: string; label: string }>
   palette?: Array<{ hex: string; name: string; dark?: boolean }>
   marks?: MediaItem[]
@@ -57,10 +59,10 @@ export const projects: Project[] = [
     year: "2026",
     summary:
       "I wanted this lending campaign to feel like a personal introduction, starting with a box worth opening.",
-    challengeTitle: "Here’s what needed solving.",
+    challengeTitle: "Getting noticed by the people who refer.",
     challenge:
       "Our commercial lenders wanted more referrals from CPAs, the people business owners trust when a financing question comes up. CPAs already get plenty of bank mail. I needed something personal enough to get opened and clear enough that they’d remember exactly who to call.",
-    approachTitle: "How I brought it to life.",
+    approachTitle: "Built around each lender.",
     approach:
       "I researched and refined the prospect lists, then built the campaign around each lender. Every package had a custom box, an organizer engraved with the recipient’s name, a brochure, and a special-offer postcard. QR codes led to lender-specific landing pages, and a Constant Contact email followed up. I timed it all for right after tax season, when CPAs finally have a minute to breathe.",
     outcome:
@@ -69,6 +71,7 @@ export const projects: Project[] = [
     channels: "Custom mailers, print, email, and landing pages",
     cover: { src: media("cl-box.webp"), alt: "Open Florida Capital Bank mailer box with a QR code inside" },
     hero: [{ src: media("cl-box.webp"), alt: "Open Florida Capital Bank mailer box with a QR code inside" }],
+    featured: true,
     className: "project-card--pink",
     metrics: [
       { value: "$2.3M", label: "Contributed to funded commercial loans" },
@@ -101,73 +104,8 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "fee-advantage-review",
-    number: "02",
-    title: "Treasury Management\nCampaign",
-    shortTitle: "Treasury Management Campaign",
-    category: "A playful campaign about not-so-fun fees",
-    year: "2026",
-    summary: "A spreadsheet gave me the idea. The challenge was making people care about what was in it.",
-    challengeTitle: "Here’s what needed solving.",
-    challenge:
-      "While comparing our Treasury Management pricing with competitors, I noticed we came out ahead on a lot of fees. I pitched a free Fee Advantage Review to leadership, and the retail team picked dental practices as the first audience. The catch: nobody gets excited about bank fees, and the message still had to feel credible coming from a bank.",
-    approachTitle: "How I brought it to life.",
-    approach:
-      "I leaned into the audience. Dental practices got a tooth-shaped mailer that said “Let’s get to the root of your banking fees,” and a leaky piggy bank asked “Is your money leaking?” across social. I built landing pages for each market manager with forms, QR codes, and call tracking, then carried the idea to Gainesville with ads in the Gainesville Sun and The Independent Florida Alligator, including one very cute alligator hiding just below the surface. I created all of the campaign creative. An outside partner uploaded my ads and set up the Meta and LinkedIn campaigns.",
-    outcome:
-      "From July through late October 2026, the Meta and LinkedIn ads earned more than 1.5 million impressions and sent over 6,100 visits to the landing pages, at about 86 cents a visit. The LinkedIn ads averaged a 2.36% click-through rate. Next, I want to tighten conversion tracking so we can see which of those visits turn into fee reviews.",
-    role: "Research, the big idea, copy, art direction, and design",
-    channels: "Direct mail, Meta and LinkedIn ads, local print, and landing pages",
-    cover: { src: media("tm-social.webp"), alt: "Grid of Fee Advantage Review social ads" },
-    hero: [{ src: media("tm-social.webp"), alt: "Grid of Fee Advantage Review social ads" }],
-    className: "project-card--blue",
-    metrics: [
-      { value: "1.58M", label: "Meta and LinkedIn ad impressions" },
-      { value: "6,100+", label: "Visits to the landing pages" },
-      { value: "2.36%", label: "LinkedIn click-through rate" },
-    ],
-    gallery: [
-      {
-        layout: "wide",
-        src: media("tm-tooth.webp"),
-        alt: "Front and back of a tooth-shaped banking fee mailer",
-        caption: "Yes, I made the mailer tooth-shaped",
-      },
-      {
-        layout: "left",
-        src: media("tm-social-alt.webp"),
-        alt: "Four social ads: $2,999+ a year, It takes 5 minutes, money leaking bucket, Are you overpaying",
-        caption: "A few ways to make bank fees interesting",
-      },
-      {
-        layout: "right",
-        src: media("tm-landing.webp"),
-        alt: "Is your money leaking landing page on laptop and phone",
-        caption: "Every ad led somewhere useful",
-      },
-      {
-        layout: "left",
-        src: media("tm-sun-print.webp"),
-        alt: "Gainesville Sun print ad with a leaking piggy bank",
-        caption: "Gainesville Sun: the leaky piggy bank",
-      },
-      {
-        layout: "right",
-        src: media("tm-gator-print.webp"),
-        alt: "Independent Florida Alligator print ad with an alligator peeking above the water",
-        caption: "The Alligator: some fees hide just below the surface",
-      },
-      {
-        layout: "wide",
-        src: media("tm-gator-landing.webp"),
-        alt: "Alligator-themed fee review landing page on laptop and phone",
-        caption: "And the gator followed them online",
-      },
-    ],
-  },
-  {
     slug: "roundbird-coffee",
-    number: "03",
+    number: "02",
     title: "Roundbird\nCoffee",
     shortTitle: "Roundbird Coffee",
     category: "A passion project for a Jacksonville favorite",
@@ -186,6 +124,7 @@ export const projects: Project[] = [
     note: "Personal concept project. Not affiliated with the original Roundbird.",
     cover: { src: media("rb-closeup.webp"), alt: "Hands holding a coffee cup with the Roundbird bird mark" },
     hero: [{ src: media("rb-closeup.webp"), alt: "Hands holding a coffee cup with the Roundbird bird mark" }],
+    featured: true,
     className: "project-card--roundbird",
     palette: [
       { hex: "#EC1B24", name: "Cherry red", dark: true },
@@ -263,6 +202,72 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "fee-advantage-review",
+    number: "03",
+    title: "Treasury Management\nCampaign",
+    shortTitle: "Treasury Management Campaign",
+    category: "A playful campaign about not-so-fun fees",
+    year: "2026",
+    summary: "A spreadsheet gave me the idea. The challenge was making people care about what was in it.",
+    challengeTitle: "Making bank fees worth a second look.",
+    challenge:
+      "While comparing our Treasury Management pricing with competitors, I noticed we came out ahead on a lot of fees. I pitched a free Fee Advantage Review to leadership, and the retail team picked dental practices as the first audience. The catch: nobody gets excited about bank fees, and the message still had to feel credible coming from a bank.",
+    approachTitle: "One idea, three executions.",
+    approach:
+      "I built one idea and gave it three executions. For dental practices, a tooth-shaped mailer said “Let’s get to the root of your banking fees.” On social, a leaky piggy bank asked “Is your money leaking?” In Gainesville, ads in the Gainesville Sun and The Independent Florida Alligator showed fees hiding just below the surface, complete with one very cute alligator. Every piece pointed to landing pages I built for each market manager, with forms, QR codes, and call tracking. I created all of the campaign creative. An outside partner uploaded my ads and set up the Meta and LinkedIn campaigns.",
+    outcome:
+      "From July through late October 2026, the Meta and LinkedIn ads earned more than 1.5 million impressions and sent over 6,100 visits to the landing pages, at about 86 cents a visit. The LinkedIn ads averaged a 2.36% click-through rate. These are awareness and traffic results, not leads. Next, I want to tighten conversion tracking so we can see which of those visits turn into fee reviews.",
+    role: "Research, the big idea, copy, art direction, and design",
+    channels: "Direct mail, Meta and LinkedIn ads, local print, and landing pages",
+    cover: { src: media("tm-social.webp"), alt: "Grid of Fee Advantage Review social ads" },
+    hero: [{ src: media("tm-social.webp"), alt: "Grid of Fee Advantage Review social ads" }],
+    featured: true,
+    className: "project-card--blue",
+    metrics: [
+      { value: "1.58M", label: "Meta and LinkedIn ad impressions" },
+      { value: "6,100+", label: "Visits to the landing pages" },
+      { value: "2.36%", label: "LinkedIn click-through rate" },
+    ],
+    gallery: [
+      {
+        layout: "wide",
+        src: media("tm-tooth.webp"),
+        alt: "Front and back of a tooth-shaped banking fee mailer",
+        caption: "Execution 1 · Direct mail: yes, the mailer is tooth-shaped",
+      },
+      {
+        layout: "left",
+        src: media("tm-social-alt.webp"),
+        alt: "Four social ads: $2,999+ a year, It takes 5 minutes, money leaking bucket, Are you overpaying",
+        caption: "Execution 2 · Social: four ways into one message",
+      },
+      {
+        layout: "right",
+        src: media("tm-landing.webp"),
+        alt: "Is your money leaking landing page on laptop and phone",
+        caption: "Every execution pointed here: the Fee Advantage Review page",
+      },
+      {
+        layout: "left",
+        src: media("tm-sun-print.webp"),
+        alt: "Gainesville Sun print ad with a leaking piggy bank",
+        caption: "Execution 3 · Gainesville Sun: the leaky piggy bank",
+      },
+      {
+        layout: "right",
+        src: media("tm-gator-print.webp"),
+        alt: "Independent Florida Alligator print ad with an alligator peeking above the water",
+        caption: "Execution 3 · The Alligator: fees hiding below the surface",
+      },
+      {
+        layout: "wide",
+        src: media("tm-gator-landing.webp"),
+        alt: "Alligator-themed fee review landing page on laptop and phone",
+        caption: "Execution 3 · And the gator followed them online",
+      },
+    ],
+  },
+  {
     slug: "website-experiences",
     number: "04",
     title: "Website\nExperiences",
@@ -271,10 +276,10 @@ export const projects: Project[] = [
     year: "2025–26",
     summary:
       "Banking websites have a lot to say. My job is making it easy to find the part you actually need.",
-    challengeTitle: "Here’s what needed solving.",
+    challengeTitle: "A lot to explain, very little attention.",
     challenge:
       "These pages had a lot to explain. They also needed to meet compliance requirements, work for search, and help someone decide what to do next. I focused on making the information easier to move through.",
-    approachTitle: "How I brought it to life.",
+    approachTitle: "Clearer pages, clearer next steps.",
     approach:
       "I designed and built campaign and product pages in WordPress, wrote the copy, and created forms that send inquiries to the right person. I added QR codes and tracking numbers so the team could follow campaign activity, and wrote FAQ content around the questions customers actually ask, which also helps the pages show up in search.",
     outcome:
@@ -283,6 +288,7 @@ export const projects: Project[] = [
     channels: "WordPress, print-to-web campaigns, and search",
     cover: { src: media("web-checking.webp"), alt: "Business checking landing page on a laptop" },
     hero: [{ src: media("web-checking.webp"), alt: "Business checking landing page on a laptop" }],
+    featured: true,
     className: "project-card--violet",
     metrics: [
       { value: "20+", label: "New landing pages" },
@@ -333,10 +339,10 @@ export const projects: Project[] = [
     category: "Explainers and event content",
     year: "2026",
     summary: "Some things are easier to show than explain. Like how to send a wire.",
-    challengeTitle: "Here’s what needed solving.",
+    challengeTitle: "Easier to show than tell.",
     challenge:
       "Sending an ACH payment or a wire comes with a lot of questions, and written instructions only go so far when you’re staring at an online banking screen. On the social side, I wanted the Women of the Year event in Orlando to feel as fun online as it did in the room.",
-    approachTitle: "How I brought it to life.",
+    approachTitle: "Tutorials and a recap.",
     approach:
       "I planned each tutorial with our internal specialists, recorded the steps one screen at a time, and edited them with captions and graphics so customers can follow along at their own pace. For Women of the Year, I put together a short vertical recap for social with bold captions that match the energy of the day.",
     outcome:
@@ -354,6 +360,7 @@ export const projects: Project[] = [
       { src: media("vid-woy-mockup.mp4"), video: "autoplay", poster: media("vid-woy-mockup-poster.webp"), alt: "Women of the Year social video playing on a phone" },
       { src: media("vid-wire.mp4"), video: "autoplay", poster: media("vid-wire-poster.webp"), alt: "Wire tutorial video playing on a laptop" },
     ],
+    featured: false,
     className: "project-card--yellow",
     gallery: [
       {
@@ -361,7 +368,7 @@ export const projects: Project[] = [
         src: media("vid-ach.mp4"),
         video: "controls",
         alt: "ACH and wire tutorial videos",
-        caption: "Step-by-step ACH and wire guides (press play, sound on)",
+        caption: "Customer education: ACH and wire guides I planned, recorded, and edited (sound on)",
         ratio: "572 / 714",
         group: [
           { src: media("vid-ach.mp4"), video: "controls", poster: media("vid-ach-poster.webp"), alt: "How to send an ACH payment tutorial video" },
@@ -374,7 +381,7 @@ export const projects: Project[] = [
         video: "controls",
         poster: media("vid-woy-social-poster.webp"),
         alt: "Women of the Year event recap, vertical social video",
-        caption: "Women of the Year recap for social",
+        caption: "Event storytelling: a Women of the Year recap for social",
       },
     ],
   },
@@ -386,10 +393,10 @@ export const projects: Project[] = [
     category: "A capstone campaign for UNF",
     year: "2025",
     summary: "One communication degree was becoming four. Our job was to make that feel like good news.",
-    challengeTitle: "Here’s what needed solving.",
+    challengeTitle: "One degree becoming four.",
     challenge:
       "UNF’s School of Communication was moving from one general degree to four specialized majors: Advertising, Public Relations, Digital Video Production, and Multimedia Journalism. Students needed to understand what was changing and find the path that fit them.",
-    approachTitle: "How we brought it to life.",
+    approachTitle: "4X Stronger.",
     approach:
       "I was on the design team. Survey research from our research team shaped the concept, “4X Stronger,” where each major got its own color and line: ideas, stories, voices, and truth, all made stronger. I helped develop the visual direction and designed the campaign plans book. The campaign also included posters, street banners, table tents with QR codes, a chalk takeover, and a passport students could get stamped as they explored each major.",
     outcome: "UNF kept using our campaign work on social media after I graduated.",
@@ -398,6 +405,7 @@ export const projects: Project[] = [
     note: "Team project for the UNF advertising capstone.",
     cover: { src: media("unf-chalk.webp"), alt: "4X Stronger chalk takeover for the four communication majors" },
     hero: [{ src: media("unf-poster.webp"), alt: "Major Changes poster on a campus building" }],
+    featured: false,
     className: "project-card--navy",
     gallery: [
       {

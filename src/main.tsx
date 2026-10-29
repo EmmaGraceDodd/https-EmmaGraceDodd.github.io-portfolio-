@@ -7,6 +7,7 @@ import "@fontsource/cormorant-garamond/500-italic.css"
 import "@fontsource/manrope/400.css"
 import "@fontsource/manrope/500.css"
 import "@fontsource/manrope/600.css"
+import "@fontsource/caveat/500.css"
 import App from "./app/App"
 import "./index.css"
 
