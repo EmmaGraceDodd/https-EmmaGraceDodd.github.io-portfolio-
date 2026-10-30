@@ -1,26 +1,30 @@
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
+import { launchCard } from "./cardFlip"
+import { ContactFooter } from "./Contact"
 import gsap from "gsap"
 import { Draggable } from "gsap/Draggable"
+import { InertiaPlugin } from "gsap/InertiaPlugin"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { FINE_POINTER, MOTION_OK, useMagnetic, useSmoothAnchors } from "./interactions"
 import { Arrow, Media, useReveal } from "./Media"
 import { MusicPlayer } from "./MusicPlayer"
+import { SiteNav } from "./SiteNav"
 import { useTextMotion } from "./motion"
 import { media, projects, type Project } from "./projectData"
 
-gsap.registerPlugin(Draggable)
+gsap.registerPlugin(Draggable, InertiaPlugin, ScrollTrigger)
 
 // three.js only loads on the homepage, after everything else
 const HeroBackdrop = lazy(() => import("./HeroBackdrop"))
 
-// Headline: swap these two lines to try the other options.
-//   ["Pretty smart", "ideas."]      ← current
-//   ["Ideas that", "actually work."]
-//   ["Big ideas,", "done right."]
+// Headline: swap these two lines to try other options.
+//   ["My", "Portfolio"]             ← current
+//   ["Pretty smart", "ideas."]
 //   ["I design", "with purpose"]   ← the original
-const HEADLINE = ["Pretty smart", "ideas."]
+const HEADLINE = ["My", "Portfolio"]
 
 const RESUME = `${import.meta.env.BASE_URL}Emma-Dodd-Resume.pdf`
-const EMAIL = "emmagdodd1@gmail.com"
 
 const toolbox = [
   { group: "Design", tools: ["InDesign", "Illustrator", "Photoshop", "Figma", "Canva"] },
@@ -31,34 +35,66 @@ const toolbox = [
 const featured = projects.filter((p) => p.featured)
 const moreWork = projects.filter((p) => !p.featured)
 
+/** Plain clicks fly the cover image into the project page (see cardFlip.ts).
+ *  Ctrl/cmd-clicks and reduced motion keep the normal link behavior. */
+function useCardOpen(slug: string, frameSelector: string, radius: string) {
+  const navigate = useNavigate()
+  return (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    if (!launchCard(e.currentTarget.querySelector<HTMLElement>(frameSelector), radius)) return
+    e.preventDefault()
+    navigate(`/work/${slug}`)
+  }
+}
+
 function ProjectCard({ project }: { project: Project }) {
+  const open = useCardOpen(project.slug, ".work-card-media", "28px")
   return (
     <Link
-      className={`project-stack reveal ${project.className}`}
+      className={`work-card ${project.className}`}
       to={`/work/${project.slug}`}
       aria-label={`Open ${project.shortTitle} case study`}
+      onClick={open}
     >
-      <span className="stack-layer stack-layer--back" />
-      <span className="stack-layer stack-layer--middle" />
-      <span className="project-card">
-        <span className="project-image-wrap">
-          <Media item={project.cover} eager />
-          <span className="project-number">{project.number}</span>
-          <span className="project-open">
+      <span className="work-card-media">
+        <Media item={project.cover} eager />
+        <span className="work-card-glare" aria-hidden="true" />
+      </span>
+      <span className="work-card-chip">{project.number}</span>
+      <span className="work-card-panel">
+        <span className="work-card-title">
+          {project.title.split("\n").map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </span>
+        <span className="work-card-meta">
+          <span>{project.year}</span>
+          <span className="work-card-open">
             <Arrow diagonal />
           </span>
-          <span className="project-view">Take a peek</span>
         </span>
-        <span className="project-meta">
-          <span className="project-title">
-            {project.title.split("\n").map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-          </span>
-          <span className="project-info">
-            <span>{project.year}</span>
-          </span>
-        </span>
+      </span>
+      <span className="work-card-cursor" aria-hidden="true">
+        View
+      </span>
+    </Link>
+  )
+}
+
+function MoreCard({ project }: { project: Project }) {
+  const open = useCardOpen(project.slug, ".more-card-image", "16px")
+  return (
+    <Link className={`more-card reveal ${project.className}`} to={`/work/${project.slug}`} aria-label={`Open ${project.shortTitle}`} onClick={open}>
+      <span className="more-card-image">
+        <Media item={project.cover} />
+      </span>
+      <span className="more-card-text">
+        <span className="project-number-small">{project.number}</span>
+        <strong>{project.shortTitle}</strong>
+        <span className="more-card-category">{project.year}</span>
+      </span>
+      <span className="project-open">
+        <Arrow diagonal />
       </span>
     </Link>
   )
@@ -69,22 +105,51 @@ export function Home() {
   const pageRef = useRef<HTMLElement>(null)
   useReveal()
   useTextMotion(pageRef)
+  useMagnetic(pageRef)
+  useSmoothAnchors(pageRef)
 
+  // Runs after useTextMotion, so the headline is already split into letters.
   useLayoutEffect(() => {
+    const page = pageRef.current
     const hero = heroRef.current
-    if (!hero) return
+    if (!page || !hero) return
     const mm = gsap.matchMedia()
     const drags: Draggable[] = []
     const ctx = gsap.context(() => {
       const bubbles = gsap.utils.toArray<HTMLElement>(".bubble", hero)
       // Draggable owns only the outer position. Entrance/float effects belong
       // to the inner label so drag initialization cannot capture scale zero.
+      // Throw a bubble and it glides to a stop, leaning into the throw.
       bubbles.forEach((bubble) => {
+        const label = bubble.firstElementChild as HTMLElement
+        const lean = gsap.quickTo(label, "rotation", { duration: 0.4, ease: "power3.out" })
         gsap.set(bubble, { scale: 1, autoAlpha: 1 })
-        drags.push(...Draggable.create(bubble, { bounds: hero, inertia: false, zIndexBoost: true }))
+        drags.push(
+          ...Draggable.create(bubble, {
+            bounds: hero,
+            inertia: true,
+            edgeResistance: 0.8,
+            zIndexBoost: true,
+            onPress() {
+              gsap.to(label, { scale: 1.1, duration: 0.25, ease: "back.out(3)", overwrite: "auto" })
+            },
+            onDrag(this: Draggable) {
+              lean(gsap.utils.clamp(-14, 14, this.deltaX * 1.4))
+            },
+            onThrowUpdate(this: Draggable) {
+              lean(gsap.utils.clamp(-14, 14, this.deltaX * 1.4))
+            },
+            onRelease() {
+              gsap.to(label, { scale: 1, duration: 0.9, ease: "elastic.out(1, 0.35)", overwrite: "auto" })
+            },
+            onThrowComplete() {
+              lean(0)
+            },
+          }),
+        )
       })
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      mm.add(MOTION_OK, () => {
         const swing = hero.querySelector(".badge-swing")
         const reaction = hero.querySelector<HTMLElement>(".badge-react")
         if (swing) {
@@ -92,15 +157,77 @@ export function Home() {
           gsap.to(swing, { rotate: 2.2, duration: 2.6, ease: "sine.inOut", yoyo: true, repeat: -1, delay: 1.8 })
         }
         bubbles.forEach((bubble, i) => {
-          gsap.fromTo(bubble.firstElementChild, { scale: 0.8, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.9, ease: "back.out(2)", delay: 0.6 + i * 0.18 })
+          gsap.fromTo(bubble.firstElementChild, { scale: 0.8, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.9, ease: "back.out(2)", delay: 0.6 + i * 0.25 })
           gsap.to(bubble.firstElementChild, {
-            y: i % 2 ? 10 : -10,
+            y: i % 2 ? 8 : -8,
             duration: 2.4 + i * 0.5,
             ease: "sine.inOut",
             yoyo: true,
             repeat: -1,
           })
         })
+
+        // The ticker runs on GSAP so scrolling can push it: faster, in the
+        // direction you scroll, then it eases back to its own pace.
+        const ticker = page.querySelector<HTMLElement>(".ticker")
+        const track = ticker?.firstElementChild as HTMLElement | null
+        if (ticker && track) {
+          gsap.set(track, { animation: "none" })
+          const loop = gsap.fromTo(track, { xPercent: 0 }, { xPercent: -50, duration: 26, ease: "none", repeat: -1 })
+          const skew = gsap.quickTo(track, "skewX", { duration: 0.4, ease: "power3.out" })
+          ScrollTrigger.create({
+            trigger: ticker,
+            start: "top bottom",
+            end: "bottom top",
+            onUpdate(self) {
+              const v = self.getVelocity()
+              const speed = gsap.utils.clamp(1, 6, 1 + Math.abs(v) / 400)
+              skew(gsap.utils.clamp(-10, 10, v / -250))
+              gsap.to(loop, {
+                timeScale: self.direction * speed,
+                duration: 0.2,
+                overwrite: true,
+                onComplete: () => {
+                  skew(0)
+                  gsap.to(loop, { timeScale: self.direction, duration: 1.4, ease: "power2.out" })
+                },
+              })
+            },
+          })
+        }
+
+        // Project cards wipe open from the bottom like a curtain, the photo
+        // settles from a zoom, then the number chip and title panel float up.
+        // The photo also drifts gently as you scroll past.
+        const cards = gsap.utils.toArray<HTMLElement>(".work-card", page)
+        cards.forEach((card) => {
+          const frame = card.querySelector(".work-card-media")
+          const cover = card.querySelector(".work-card-media > img, .work-card-media > video")
+          gsap.set(frame, { clipPath: "inset(100% 0% 0% 0% round 28px)" })
+          gsap.set(card.querySelectorAll(".work-card-chip, .work-card-panel"), { autoAlpha: 0, y: 28 })
+          if (cover) {
+            gsap.set(cover, { scale: 1.3 })
+            gsap.fromTo(
+              cover,
+              { yPercent: -5 },
+              { yPercent: 5, ease: "none", scrollTrigger: { trigger: card, start: "top bottom", end: "bottom top", scrub: true } },
+            )
+          }
+        })
+        ScrollTrigger.batch(cards, {
+          start: "top 88%",
+          once: true,
+          onEnter: (batch) =>
+            batch.forEach((card, i) => {
+              const cover = card.querySelector(".work-card-media > img, .work-card-media > video")
+              gsap
+                .timeline({ delay: i * 0.18 })
+                .to(card.querySelector(".work-card-media"), { clipPath: "inset(0% 0% 0% 0% round 28px)", duration: 1.3, ease: "expo.inOut" })
+                .to(cover, { scale: 1.12, duration: 1.8, ease: "expo.out" }, 0.1)
+                .to(card.querySelectorAll(".work-card-chip, .work-card-panel"), { autoAlpha: 1, y: 0, duration: 1, ease: "expo.out", stagger: 0.12 }, 0.75)
+            }),
+        })
+
         const holder = reaction?.querySelector<HTMLElement>(".badge-holder")
         const gloss = reaction?.querySelector<HTMLElement>(".badge-gloss")
         if (!reaction || !holder || !gloss) return
@@ -160,18 +287,87 @@ export function Home() {
           shine(0)
           gsap.to(holder, { scale: 1, duration: 0.7, ease: "power3.out", overwrite: "auto" })
         }
+        // On a phone there's no hover, so a tap flicks the badge instead.
+        const onTap = (event: PointerEvent) => {
+          if (event.pointerType === "mouse") return
+          const rect = reaction.getBoundingClientRect()
+          nudge(event.clientX < rect.left + rect.width / 2 ? -70 : 70)
+        }
         reaction.addEventListener("pointerenter", onEnter)
         reaction.addEventListener("pointermove", onMove)
         reaction.addEventListener("pointerleave", onLeave)
+        reaction.addEventListener("pointerdown", onTap)
         return () => {
           gsap.ticker.remove(step)
           reaction.removeEventListener("pointerenter", onEnter)
           reaction.removeEventListener("pointermove", onMove)
           reaction.removeEventListener("pointerleave", onLeave)
+          reaction.removeEventListener("pointerdown", onTap)
           gsap.set([reaction, holder, gloss], { clearProps: "transform" })
         }
       })
-    }, hero)
+
+      // Mouse only: the card tilts toward the cursor, a soft glare follows it
+      // across the photo, the glass panel drifts the other way for depth, and
+      // a round "View" cursor trails the pointer.
+      mm.add(FINE_POINTER, () => {
+        const offs = gsap.utils.toArray<HTMLElement>(".work-card", page).map((card) => {
+          const frame = card.querySelector<HTMLElement>(".work-card-media")!
+          const panel = card.querySelector<HTMLElement>(".work-card-panel")!
+          const disc = card.querySelector<HTMLElement>(".work-card-cursor")!
+          const cover = frame.querySelector<HTMLElement>(":scope > img, :scope > video")
+          gsap.set(card, { transformPerspective: 1200 })
+          gsap.set(disc, { scale: 0, autoAlpha: 0 })
+          const opts = { duration: 0.7, ease: "power3.out" }
+          const rx = gsap.quickTo(card, "rotationX", opts)
+          const ry = gsap.quickTo(card, "rotationY", opts)
+          const lift = gsap.quickTo(card, "y", opts)
+          const panelX = gsap.quickTo(panel, "x", opts)
+          const drift = cover ? gsap.quickTo(cover, "x", { duration: 1, ease: "power3.out" }) : null
+          const discX = gsap.quickTo(disc, "x", { duration: 0.5, ease: "power3.out" })
+          const discY = gsap.quickTo(disc, "y", { duration: 0.5, ease: "power3.out" })
+
+          const enter = (e: PointerEvent) => {
+            const r = card.getBoundingClientRect()
+            gsap.set(disc, { x: e.clientX - r.left, y: e.clientY - r.top })
+            gsap.to(disc, { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(2)", overwrite: "auto" })
+            lift(-10)
+            if (cover) gsap.to(cover, { scale: 1.18, duration: 1.2, ease: "power3.out", overwrite: "auto" })
+          }
+          const move = (e: PointerEvent) => {
+            const r = card.getBoundingClientRect()
+            const nx = (e.clientX - r.left) / r.width - 0.5
+            const ny = (e.clientY - r.top) / r.height - 0.5
+            ry(nx * 7)
+            rx(ny * -6)
+            panelX(nx * -14)
+            drift?.(nx * -18)
+            discX(e.clientX - r.left)
+            discY(e.clientY - r.top)
+            frame.style.setProperty("--gx", `${(nx + 0.5) * 100}%`)
+            frame.style.setProperty("--gy", `${(ny + 0.5) * 100}%`)
+          }
+          const leave = () => {
+            rx(0)
+            ry(0)
+            lift(0)
+            panelX(0)
+            drift?.(0)
+            gsap.to(disc, { scale: 0, autoAlpha: 0, duration: 0.35, ease: "power2.in", overwrite: "auto" })
+            if (cover) gsap.to(cover, { scale: 1.12, duration: 1, ease: "power3.out", overwrite: "auto" })
+          }
+          card.addEventListener("pointerenter", enter)
+          card.addEventListener("pointermove", move)
+          card.addEventListener("pointerleave", leave)
+          return () => {
+            card.removeEventListener("pointerenter", enter)
+            card.removeEventListener("pointermove", move)
+            card.removeEventListener("pointerleave", leave)
+          }
+        })
+        return () => offs.forEach((off) => off())
+      })
+    }, page)
     return () => { mm.revert(); drags.forEach((drag) => drag.kill()); ctx.revert() }
   }, [])
 
@@ -187,16 +383,8 @@ export function Home() {
       <a className="skip-link" href="#work">
         Skip to my work
       </a>
-      <header className="site-header">
-        <nav className="nav-links" aria-label="Main navigation">
-          <a href="#work">Work</a>
-          <a href="#about">About</a>
-          <a href={RESUME} target="_blank" rel="noreferrer">
-            Resume
-          </a>
-          <a href="#contact">Contact</a>
-        </nav>
-      </header>
+      <SiteNav variant="home" />
+      <MusicPlayer />
 
       <section
         className="hero"
@@ -209,7 +397,11 @@ export function Home() {
         </Suspense>
 
         <div className="hero-copy">
-          <h1 data-split="chars" data-split-now>
+          {/* little pink bubbles you can grab and throw */}
+          <span className="bubble bubble--one">
+            <span>Creative marketing · Advertising · Design</span>
+          </span>
+          <h1 data-split="chars" data-split-now data-ripple>
             {HEADLINE[0]}
             <span>{HEADLINE[1]}</span>
           </h1>
@@ -217,33 +409,23 @@ export function Home() {
             I’m Emma, a creative marketer who loves where good design meets smart strategy. I take ideas from
             the messy first thought all the way to launch.
           </p>
-          <a className="scroll-cue" href="#work">
+          <a className="scroll-cue" href="#work" data-magnetic="0.35">
             <span>Explore projects</span>
             <Arrow />
           </a>
         </div>
 
-        {/* little pink bubbles you can drag around */}
-        <div className="bubbles">
-          <span className="bubble bubble--one">
-            <span>Creative marketing · Advertising · Design</span>
-          </span>
+        <div className="badge-rig" aria-label="Emma's work badge: Emma Dodd, Marketing Coordinator">
           <span className="bubble bubble--two">
             <span>Hi, I’m Emma ✦</span>
           </span>
-          <span className="bubble bubble--three">
-            <span>Jacksonville, FL</span>
-          </span>
-        </div>
-
-        <div className="badge-rig" aria-label="Emma's work badge: Florida Capital Bank, Marketing Coordinator">
           <div className="badge-swing">
             <div className="badge-react">
             <span className="badge-strap" aria-hidden="true" />
             <div className="badge-holder">
               <img className="badge-holder-img" src={media("prop-badge.webp")} alt="" aria-hidden="true" />
               <div className="badge-card">
-                <p className="badge-org">Florida Capital Bank</p>
+                <span className="badge-org" aria-hidden="true" />
                 <div className="badge-photo" style={{ backgroundImage: `url(${media("bg-stars-pink.webp")})` }}>
                   <img src={media("emma-headshot.webp")} alt="Emma Dodd smiling" fetchPriority="high" />
                 </div>
@@ -285,7 +467,7 @@ export function Home() {
 
       <section className="work-section" id="work">
         <div className="section-heading reveal">
-          <h2 data-split="chars">My work</h2>
+          <h2 data-split="chars" data-ripple>My work</h2>
           <p className="section-count">01—{String(featured.length).padStart(2, "0")}</p>
         </div>
 
@@ -297,7 +479,7 @@ export function Home() {
 
         <div className="more-work">
           <div className="more-work-heading reveal">
-            <h3 data-split="words">
+            <h3 data-split="words" data-ripple>
               More things <span>I’ve made</span>
             </h3>
             <p className="section-count">
@@ -306,26 +488,7 @@ export function Home() {
           </div>
           <div className="more-work-grid">
             {moreWork.map((project) => (
-              <Link
-                className={`more-card reveal ${project.className}`}
-                key={project.slug}
-                to={`/work/${project.slug}`}
-                aria-label={`Open ${project.shortTitle}`}
-              >
-                <span className="more-card-image">
-                  <Media item={project.cover} />
-                </span>
-                <span className="more-card-text">
-                  <span className="project-number-small">{project.number}</span>
-                  <strong>{project.shortTitle}</strong>
-                  <span className="more-card-category">
-                    {project.year}
-                  </span>
-                </span>
-                <span className="project-open">
-                  <Arrow diagonal />
-                </span>
-              </Link>
+              <MoreCard project={project} key={project.slug} />
             ))}
           </div>
         </div>
@@ -359,7 +522,7 @@ export function Home() {
         </div>
 
         <div className="about-side">
-          <h2 data-split="lines">
+          <h2 data-split="lines" data-ripple>
             A little
             <span>about me.</span>
           </h2>
@@ -394,7 +557,7 @@ export function Home() {
           </div>
 
           <div className="about-actions">
-            <a className="scroll-cue" href={RESUME} target="_blank" rel="noreferrer">
+            <a className="scroll-cue" href={RESUME} target="_blank" rel="noreferrer" data-magnetic="0.35">
               <span>View my resume</span>
               <Arrow diagonal />
             </a>
@@ -402,28 +565,10 @@ export function Home() {
               Say hi on LinkedIn
             </a>
           </div>
-
-          <MusicPlayer />
         </div>
       </section>
 
-      <footer id="contact">
-        <a className="footer-mail" href={`mailto:${EMAIL}`} aria-label="Email Emma">
-          <img src={media("mail-icon.webp")} alt="" />
-        </a>
-        <p className="eyebrow">Okay, your turn</p>
-        <a className="contact-link" href={`mailto:${EMAIL}`} data-split="lines">
-          Let’s make
-          <span>something lovely.</span>
-        </a>
-        <div className="footer-bottom">
-          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-          <a href="tel:+19044661148">904.466.1148</a>
-          <a href="https://www.linkedin.com/in/emma-dodd/" target="_blank" rel="noreferrer">
-            LinkedIn
-          </a>
-        </div>
-      </footer>
+      <ContactFooter />
     </main>
   )
 }

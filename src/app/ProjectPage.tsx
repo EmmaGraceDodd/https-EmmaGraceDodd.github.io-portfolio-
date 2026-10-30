@@ -1,5 +1,8 @@
-import { Suspense, lazy, useEffect, useRef } from "react"
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef } from "react"
 import { Link, Navigate, useParams } from "react-router"
+import { landCard } from "./cardFlip"
+import { useMagnetic } from "./interactions"
+import { SiteNav } from "./SiteNav"
 import { Arrow, Media, useReveal } from "./Media"
 import { useTextMotion } from "./motion"
 import { getProject, projects, type GalleryItem } from "./projectData"
@@ -58,6 +61,14 @@ function ProjectView() {
   const pageRef = useRef<HTMLElement>(null)
   useReveal(slug)
   useTextMotion(pageRef, slug)
+  useMagnetic(pageRef, slug)
+
+  // If a homepage card was clicked, fly its cover onto this page's hero image.
+  // The custom pages (Treasury, Roundbird) have no matching image, so the
+  // cover fills the screen and fades instead.
+  useLayoutEffect(() => {
+    landCard(pageRef.current?.querySelector(".case-hero-image > *") ?? null)
+  }, [slug])
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" })
@@ -76,29 +87,24 @@ function ProjectView() {
   const nextProject = projects[(projectIndex + 1) % projects.length]
 
   if (project.slug === "roundbird-coffee")
-    return <Suspense fallback={<main className="rb-page" />}><RoundbirdPage project={project} next={nextProject} /></Suspense>
+    return <Suspense fallback={<main className="rb-page"><SiteNav variant="project" /></main>}><RoundbirdPage project={project} next={nextProject} /></Suspense>
 
   if (project.slug === "fee-advantage-review")
     return (
-      <Suspense fallback={<main className="case-page tm-page" />}>
+      <Suspense fallback={<main className="case-page tm-page"><SiteNav variant="project" /></main>}>
         <TreasuryPage project={project} next={nextProject} key={project.slug} />
       </Suspense>
     )
 
   return (
     <main className={`case-page case-page--${project.slug}`} ref={pageRef}>
-      <header className="case-header">
-        <Link className="case-back" to={{ pathname: "/", hash: "#work" }}>
-          <span>Back to all work</span>
-          <span aria-hidden="true">×</span>
-        </Link>
-      </header>
+      <SiteNav variant="project" />
 
       <section className="case-hero">
         <p className="eyebrow">
           Project {project.number} · {project.year}
         </p>
-        <h1 data-split="lines" data-split-now>
+        <h1 data-split="lines" data-split-now data-ripple>
           {project.title.split("\n").map((line, i) => (
             <span key={line} className={i === 1 ? "h1-accent" : undefined}>
               {line}
@@ -147,12 +153,12 @@ function ProjectView() {
       <section className="case-story">
         <article>
           <p className="story-number">01</p>
-          <h2 data-split="lines">{project.challengeTitle}</h2>
+          <h2 data-split="lines" data-ripple>{project.challengeTitle}</h2>
           <p>{project.challenge}</p>
         </article>
         <article>
           <p className="story-number">02</p>
-          <h2 data-split="lines">{project.approachTitle}</h2>
+          <h2 data-split="lines" data-ripple>{project.approachTitle}</h2>
           <p>{project.approach}</p>
         </article>
       </section>
@@ -198,7 +204,7 @@ function ProjectView() {
 
       <Link className="next-project" to={`/work/${nextProject.slug}`}>
         <span className="eyebrow">Keep looking</span>
-        <strong data-split="words">{nextProject.shortTitle}</strong>
+        <strong data-split="words" data-ripple>{nextProject.shortTitle}</strong>
         <Arrow />
       </Link>
     </main>

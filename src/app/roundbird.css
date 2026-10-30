@@ -8,11 +8,7 @@
   --pink: #ec1b24;
   --line: #3c3b3450;
 }
-.rb-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; padding: 2rem 6vw; font-size: .85rem; }
-@media (hover: hover) and (pointer: fine) {
-  .rb-page, .rb-page * { cursor: var(--rb-cursor), auto; }
-  .rb-page a, .rb-page button, .rb-page video { cursor: var(--rb-cursor), pointer; }
-}
+.rb-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; padding: 6.5rem 6vw 2rem; font-size: .85rem; }
 .rb-header a { padding-block: .5rem; }
 .rb-page a:focus-visible, .rb-page video:focus-visible { outline: 3px solid #ec1b24; outline-offset: 6px; }
 .rb-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 4vw; padding: 1rem 6vw 5rem; min-height: min(56rem, 92svh); }
@@ -78,7 +74,7 @@
 .rb-next strong { font-size: clamp(1.6rem, 3vw, 3rem); letter-spacing: -.045em; font-weight: 600; }
 .rb-next svg { width: 2rem; }
 @media (max-width: 900px) {
-  .rb-header { padding: 1.5rem 5vw; font-size: .75rem; }
+  .rb-header { padding: 5.5rem 5vw 1.5rem; font-size: .75rem; }
   .rb-hero { padding: 2rem 5vw 4rem; min-height: auto; gap: 2rem; }
   .rb-hero h1 { font-size: clamp(3.1rem, 8.5vw, 6rem); }
   .rb-hero-copy > p { font-size: 1rem; }

@@ -12,7 +12,32 @@ gsap.registerPlugin(ScrollTrigger, SplitText)
      data-split="write"  handwriting paragraphs appear in sequence
    Add data-split-now to play on load instead of on scroll.
    Mark numbers with data-count to count up from zero.
+   Add data-ripple to a title so its letters hop when the mouse passes over
+   them, and a tap or click sends a wave through the whole title. Give it a
+   selector (data-ripple=".rb-letter") when the letters are already wrapped.
    Nothing moves for people who turn off motion. */
+
+function ripple(title: HTMLElement, letters: HTMLElement[]) {
+  gsap.set(letters, { transformOrigin: "50% 100%" })
+  const hop = (letter: HTMLElement, delay = 0) =>
+    gsap
+      .timeline({ delay })
+      .to(letter, { yPercent: -22, scaleY: 1.08, duration: 0.2, ease: "power2.out", overwrite: "auto" })
+      .to(letter, { yPercent: 0, scaleY: 1, duration: 1, ease: "elastic.out(1, 0.32)" })
+  const onLetter = (e: PointerEvent) => {
+    if (e.pointerType === "mouse") hop(e.currentTarget as HTMLElement)
+  }
+  const onWave = (e: PointerEvent) => {
+    const hit = e.target instanceof Element ? letters.findIndex((letter) => letter.contains(e.target as Node)) : -1
+    letters.forEach((letter, i) => hop(letter, Math.abs(i - Math.max(hit, 0)) * 0.04))
+  }
+  letters.forEach((letter) => letter.addEventListener("pointerenter", onLetter))
+  title.addEventListener("pointerdown", onWave)
+  return () => {
+    letters.forEach((letter) => letter.removeEventListener("pointerenter", onLetter))
+    title.removeEventListener("pointerdown", onWave)
+  }
+}
 
 export function useTextMotion(scope: RefObject<HTMLElement | null>, dep?: unknown) {
   useLayoutEffect(() => {
@@ -56,9 +81,11 @@ export function useTextMotion(scope: RefObject<HTMLElement | null>, dep?: unknow
             })
             return
           }
+          // titles that ripple also need their letters split
           const split = SplitText.create(el, {
-            type: `lines,${type}`,
+            type: type === "words" && el.hasAttribute("data-ripple") ? "lines,words,chars" : `lines,${type}`,
             linesClass: "split-line",
+            charsClass: "split-char",
           })
           const targets = type === "chars" ? split.chars : split.words
           gsap.from(targets, {
@@ -95,6 +122,16 @@ export function useTextMotion(scope: RefObject<HTMLElement | null>, dep?: unknow
             scrollTrigger: { trigger: el, start: "top 90%", once: true },
           })
         })
+
+        const offs = Array.from(root.querySelectorAll<HTMLElement>("[data-ripple]"), (el) => {
+          const own = el.dataset.ripple
+          let letters = Array.from(el.querySelectorAll<HTMLElement>(own || ".split-char"))
+          if (!letters.length) {
+            letters = SplitText.create(el, { type: "words,chars", charsClass: "split-char" }).chars as HTMLElement[]
+          }
+          return ripple(el, letters)
+        })
+        return () => offs.forEach((off) => off())
       })
     }, root)
     return () => {

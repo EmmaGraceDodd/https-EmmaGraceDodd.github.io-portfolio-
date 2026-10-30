@@ -1,10 +1,12 @@
-import { useLayoutEffect, useRef, type CSSProperties } from "react"
+import { useLayoutEffect, useRef } from "react"
 import { Link } from "react-router"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow, Media } from "./Media"
+import { useMagnetic } from "./interactions"
 import { useTextMotion } from "./motion"
 import { media, type Project } from "./projectData"
+import { SiteNav } from "./SiteNav"
 import "./roundbird.css"
 
 gsap.registerPlugin(ScrollTrigger)
@@ -78,17 +80,18 @@ export default function RoundbirdPage({ project, next }: { project: Project; nex
   }, [])
 
   useTextMotion(root)
+  useMagnetic(root)
 
   return (
-    <main className="rb-page" ref={root} style={{ "--rb-cursor": `url("${media("rb-metal-cursor.png")}") 3 2` } as CSSProperties}>
-      <header className="rb-header">
-        <Link to={{ pathname: "/", hash: "#work" }}>← Back to all work</Link>
+    <main className="rb-page" ref={root}>
+      <SiteNav variant="project" />
+      <p className="rb-header">
         <span>Project {project.number} · {project.year}</span>
-      </header>
+      </p>
 
       <section className="rb-hero" aria-labelledby="rb-title">
         <div className="rb-hero-copy">
-          <h1 id="rb-title" aria-label="Roundbird Coffee">
+          <h1 id="rb-title" aria-label="Roundbird Coffee" data-ripple=".rb-letter">
             {["Roundbird", "Coffee"].map((word) => <span className="rb-title-word" aria-hidden="true" key={word}>
               {Array.from(word).map((letter, index) => <span className="rb-letter" key={index}>{letter}</span>)}
               {word === "Coffee" && <span className="rb-title-dot">.</span>}

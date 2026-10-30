@@ -1,5 +1,9 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import type { MediaItem } from "./projectData"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const reducedMotion = () =>
   typeof window !== "undefined" &&
@@ -49,21 +53,31 @@ export function Media({ item, className, eager = false }: { item: MediaItem; cla
   return <img className={className} src={item.src} alt={item.alt} loading={eager ? "eager" : "lazy"} decoding="async" />
 }
 
-/** Fades elements with the .reveal class in as they scroll into view. */
+/** Elements with the .reveal class rise in as they scroll into view. Ones that
+ *  arrive together are batched, so a row of cards comes in as a stagger. */
 export function useReveal(dep?: unknown) {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible")
-            observer.unobserve(entry.target)
-          }
-        }),
-      { threshold: 0.12 },
-    )
-    document.querySelectorAll(".reveal:not(.is-visible)").forEach((el) => observer.observe(el))
-    return () => observer.disconnect()
+  useLayoutEffect(() => {
+    const items = gsap.utils.toArray<HTMLElement>(".reveal")
+    if (!items.length) return
+    const mm = gsap.matchMedia()
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.set(items, { autoAlpha: 0, y: 48 })
+      ScrollTrigger.batch(items, {
+        start: "top 92%",
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 1.1,
+            ease: "expo.out",
+            stagger: 0.12,
+            overwrite: true,
+            clearProps: "transform",
+          }),
+      })
+    })
+    return () => mm.revert()
   }, [dep])
 }
 
