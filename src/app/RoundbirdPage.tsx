@@ -4,7 +4,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow, Media } from "./Media"
 import { landCard } from "./cardFlip"
-import { useMagnetic } from "./interactions"
+import { refreshOnImageLoad, useMagnetic } from "./interactions"
 import { useTextMotion } from "./motion"
 import { media, type Project } from "./projectData"
 import { SiteNav } from "./SiteNav"
@@ -71,11 +71,9 @@ export default function RoundbirdPage({ project, next }: { project: Project; nex
       }, page)
       return () => { context.revert(); page.style.removeProperty("--rb-text") }
     })
-    const images = Array.from(root.current?.querySelectorAll("img") ?? [])
-    const refresh = () => ScrollTrigger.refresh()
-    images.forEach((img) => { if (!img.complete) img.addEventListener("load", refresh, { once: true }) })
+    const offImages = root.current ? refreshOnImageLoad(root.current, () => ScrollTrigger.refresh()) : undefined
     return () => {
-      images.forEach((img) => img.removeEventListener("load", refresh))
+      offImages?.()
       mm.revert()
     }
   }, [])

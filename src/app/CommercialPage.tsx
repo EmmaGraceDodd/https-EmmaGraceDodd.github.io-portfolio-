@@ -4,7 +4,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Flipbook, Postcard } from "./CampaignPieces"
 import { ImageViewer } from "./ImageViewer"
-import { FINE_POINTER, MOTION_OK, useMagnetic, useMedia, useSmoothAnchors } from "./interactions"
+import { FINE_POINTER, MOTION_OK, refreshOnImageLoad, useMagnetic, useMedia, useSmoothAnchors } from "./interactions"
 import type { MailerBoxHandle } from "./MailerBox3D"
 import { Arrow } from "./Media"
 import { useTextMotion } from "./motion"
@@ -268,11 +268,9 @@ export default function CommercialPage({ project, next }: { project: Project; ne
         }
       })
     }, page)
-    const imgs = Array.from(page.querySelectorAll("img"))
-    const refresh = () => ScrollTrigger.refresh()
-    imgs.forEach((img) => img.complete || img.addEventListener("load", refresh, { once: true }))
+    const offImages = refreshOnImageLoad(page, () => ScrollTrigger.refresh())
     return () => {
-      imgs.forEach((img) => img.removeEventListener("load", refresh))
+      offImages()
       floats.current.forEach((t) => t.kill())
       sequence.current?.kill()
       mm.revert()
@@ -419,8 +417,8 @@ export default function CommercialPage({ project, next }: { project: Project; ne
             <figcaption className="cl-fig cl-material-label">Brochure</figcaption>
             {flat ? (
               <div className="cl-flat">
-                <img src={set.outside.src} alt={set.outside.alt} loading="lazy" />
-                <img src={set.inside.src} alt={set.inside.alt} loading="lazy" />
+                <img src={set.outside.src} alt={set.outside.alt} width={2000} height={688} loading="lazy" />
+                <img src={set.inside.src} alt={set.inside.alt} width={2000} height={688} loading="lazy" />
               </div>
             ) : (
               <Flipbook outside={set.outside.src} inside={set.inside.src} name={lender.name} onEnlarge={() => setViewer({ items: [set.outside, set.inside], start: 0 })} />
@@ -430,8 +428,8 @@ export default function CommercialPage({ project, next }: { project: Project; ne
             <figcaption className="cl-fig cl-material-label">Postcard</figcaption>
             {flat ? (
               <div className="cl-flat">
-                <img src={set.front.src} alt={set.front.alt} loading="lazy" />
-                <img src={set.back.src} alt={set.back.alt} loading="lazy" />
+                <img src={set.front.src} alt={set.front.alt} width={1300} height={812} loading="lazy" />
+                <img src={set.back.src} alt={set.back.alt} width={1300} height={812} loading="lazy" />
               </div>
             ) : (
               <Postcard front={set.front} back={set.back} name={lender.name} />
@@ -460,7 +458,7 @@ export default function CommercialPage({ project, next }: { project: Project; ne
         </div>
         <figure className="cl-gift-photo" id="cl-gift-preview">
           <span className="cl-gift-frame">
-            <img src={media("cl-organizer-blank.webp")} alt={`Leather cord organizer embossed with the initials ${initials.split("").join(" ") || "(none)"}`} loading="lazy" />
+            <img src={media("cl-organizer-blank.webp")} alt={`Leather cord organizer embossed with the initials ${initials.split("").join(" ") || "(none)"}`} width={705} height={589} loading="lazy" />
             <span className="cl-monogram" ref={monogram} aria-hidden="true">
               {initials}
             </span>
@@ -474,11 +472,11 @@ export default function CommercialPage({ project, next }: { project: Project; ne
           From my desk to the mailroom.
         </h2>
         <figure>
-          <img src={media("cl-package-photo.webp")} alt="Finished mailer box, engraved organizer, and brochure on a desk" loading="lazy" />
+          <img src={media("cl-package-photo.webp")} alt="Finished mailer box, engraved organizer, and brochure on a desk" width={640} height={480} loading="lazy" />
           <figcaption>Packed and ready</figcaption>
         </figure>
         <figure>
-          <img src={media("cl-mailing-day.webp")} alt="Stack of packed mailer boxes on a cart, addresses hidden" loading="lazy" />
+          <img src={media("cl-mailing-day.webp")} alt="Stack of packed mailer boxes on a cart, addresses hidden" width={480} height={640} loading="lazy" />
           <figcaption>Mailing day</figcaption>
         </figure>
       </section>

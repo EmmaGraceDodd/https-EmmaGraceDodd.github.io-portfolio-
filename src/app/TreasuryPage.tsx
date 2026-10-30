@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow } from "./Media"
 import { landCard } from "./cardFlip"
 import { ImageViewer } from "./ImageViewer"
-import { useMagnetic } from "./interactions"
+import { refreshOnImageLoad, useMagnetic } from "./interactions"
 import { SiteNav } from "./SiteNav"
 import { useTextMotion } from "./motion"
 import { media, type Project } from "./projectData"
@@ -210,11 +210,9 @@ export default function TreasuryPage({ project, next }: { project: Project; next
       })
     }, root)
 
-    const imgs = Array.from(root.current?.querySelectorAll("img") ?? [])
-    const refresh = () => ScrollTrigger.refresh()
-    imgs.forEach((img) => img.complete || img.addEventListener("load", refresh, { once: true }))
+    const offImages = root.current ? refreshOnImageLoad(root.current, () => ScrollTrigger.refresh()) : undefined
     return () => {
-      imgs.forEach((img) => img.removeEventListener("load", refresh))
+      offImages?.()
       ctx.revert()
     }
   }, [])

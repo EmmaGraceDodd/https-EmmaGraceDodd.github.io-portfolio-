@@ -3627,9 +3627,9 @@ p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: p
 
 .site-nav-bar {
   align-items: center;
-  backdrop-filter: blur(16px) saturate(1.6);
-  -webkit-backdrop-filter: blur(16px) saturate(1.6);
-  background: rgba(255, 250, 244, 0.62);
+  backdrop-filter: blur(10px) saturate(1.3);
+  -webkit-backdrop-filter: blur(10px) saturate(1.3);
+  background: rgba(255, 250, 244, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 999px;
   box-shadow: 0 0.5rem 1.5rem -1rem rgba(45, 11, 80, 0.35);
@@ -4070,12 +4070,13 @@ p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: p
 /* paper: a fine grain plus a faint, uneven tone */
 .cl-hero::after {
   background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .33 0 0 0 0 .26 0 0 0 0 .19 0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .33 0 0 0 0 .26 0 0 0 0 .19 0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
   content: "";
   inset: 0;
-  mix-blend-mode: multiply;
-  opacity: 0.3;
+  /* plain blending (no multiply) so the grain isn't re-mixed with the
+     moving 3D box on every frame */
+  opacity: 0.22;
   pointer-events: none;
   position: absolute;
   z-index: -1;
@@ -4411,11 +4412,10 @@ p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: p
 }
 
 /* lender switcher, styled like an Apple segmented control: one frosted
-   track, the chosen lender in solid white */
+   track, the chosen lender in solid white. No backdrop blur: the section
+   behind it is flat, so blur would show nothing and only slow scrolling. */
 .cl-lender-picker {
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 1.6rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -4618,9 +4618,7 @@ p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: p
 
 .cl-fb-pager,
 .cl-fb-enlarge {
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   box-shadow:

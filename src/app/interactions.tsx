@@ -1,8 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type RefObject } from "react"
 import gsap from "gsap"
-import { ScrollToPlugin } from "gsap/ScrollToPlugin"
-
-gsap.registerPlugin(ScrollToPlugin)
 
 /* Small touches used across the whole site:
      data-magnetic    buttons and links lean toward the cursor (mouse only)
@@ -57,35 +54,72 @@ export function useMagnetic(scope: RefObject<HTMLElement | null>, dep?: unknown)
   }, [scope, dep])
 }
 
+/** Re-measure scroll animations once images have loaded. Loads that land
+    close together share a single refresh instead of one each. */
+export function refreshOnImageLoad(root: HTMLElement, refresh: () => void) {
+  const later = gsap.delayedCall(0.25, refresh).pause()
+  const onLoad = () => later.restart(true)
+  const imgs = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete)
+  imgs.forEach((img) => img.addEventListener("load", onLoad, { once: true }))
+  return () => {
+    later.kill()
+    imgs.forEach((img) => img.removeEventListener("load", onLoad))
+  }
+}
+
 export function useSmoothAnchors(scope: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const root = scope.current
     // the private preview link routes with #hashes, so leave those alone there
     if (!root || import.meta.env.VITE_PREVIEW) return
+    const html = document.documentElement
+    const glide = { p: 0 }
+    // your own wheel, swipe or keys take over; nothing else stops the glide
+    const stop = () => {
+      gsap.killTweensOf(glide)
+      html.style.scrollBehavior = ""
+      removeEventListener("wheel", stop)
+      removeEventListener("touchstart", stop)
+      removeEventListener("keydown", stop)
+    }
     const onClick = (e: MouseEvent) => {
       const link = e.target instanceof Element ? e.target.closest<HTMLAnchorElement>('a[href^="#"]') : null
       if (!link || link.classList.contains("skip-link")) return
       const target = document.querySelector<HTMLElement>(link.getAttribute("href") || "")
       if (!target || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
       e.preventDefault()
-      // CSS smooth scrolling would ease every frame GSAP sets, so pause it
-      const html = document.documentElement
-      const restore = () => (html.style.scrollBehavior = "")
+      stop() // a new click replaces a glide that's still going
+      // CSS smooth scrolling would ease every frame we set, so pause it
       html.style.scrollBehavior = "auto"
-      gsap.to(window, {
+      const from = scrollY
+      // the section is measured again every frame, so images loading above it
+      // (which push it down the page) can't make the glide land short
+      const to = () =>
+        Math.min(
+          target.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(target).scrollMarginTop) || 0),
+          html.scrollHeight - innerHeight,
+        )
+      glide.p = 0
+      gsap.to(glide, {
+        p: 1,
         duration: 1.2,
         ease: "power3.inOut",
-        scrollTo: { y: target, autoKill: true },
-        onInterrupt: restore,
+        onUpdate: () => scrollTo(0, from + (to() - from) * glide.p),
         onComplete: () => {
-          restore()
+          stop()
           history.replaceState(null, "", link.getAttribute("href"))
           target.focus({ preventScroll: true })
         },
       })
+      addEventListener("wheel", stop, { passive: true })
+      addEventListener("touchstart", stop, { passive: true })
+      addEventListener("keydown", stop)
     }
     root.addEventListener("click", onClick)
-    return () => root.removeEventListener("click", onClick)
+    return () => {
+      stop()
+      root.removeEventListener("click", onClick)
+    }
   }, [scope])
 }
 
