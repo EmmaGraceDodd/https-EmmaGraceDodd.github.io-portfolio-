@@ -3,6 +3,7 @@ import { Link } from "react-router"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow } from "./Media"
+import { landCard } from "./cardFlip"
 import { ImageViewer } from "./ImageViewer"
 import { useMagnetic } from "./interactions"
 import { SiteNav } from "./SiteNav"
@@ -220,6 +221,8 @@ export default function TreasuryPage({ project, next }: { project: Project; next
 
   useTextMotion(root)
   useMagnetic(root)
+  // no matching hero image here, so a clicked card's cover fills the screen and fades
+  useLayoutEffect(() => landCard(null), [])
 
   return (
     <main className="case-page tm-page" ref={root}>

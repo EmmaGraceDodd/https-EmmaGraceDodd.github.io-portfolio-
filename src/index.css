@@ -3960,3 +3960,1283 @@ p, dd, figcaption, .project-title, .project-info, .more-card-text { text-wrap: p
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =====================================================================
+   Commercial Lending (CommercialPage.tsx, MailerBox3D.tsx,
+   CampaignPieces.tsx): "a box worth opening".
+   Look: a print shop / mailroom desk. Warm beige, FLCBank navy and sky
+   blue, with quiet production details (crop marks, a postmark, perforated
+   dividers, "Fig." captions). All motion is GSAP; this is layout + rest.
+   Breakpoints: two columns above 1100px, one column below; phones (≤700px)
+   put the pieces in a row; ≤900px shows the brochure/postcard flat.
+   ===================================================================== */
+.cl-page {
+  --cl-desk: #ebe3da;
+  --cl-navy: #16205a;
+  --cl-blue: #2c4aa3;
+  --cl-sky: #2aa1e8;
+  --cl-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Courier New", monospace;
+  --cl-gutter: clamp(1.25rem, 5vw, 6rem);
+  --cl-section: clamp(4rem, 9vw, 7rem);
+  background: var(--cl-desk);
+  color: var(--cl-navy);
+  overflow-x: clip;
+}
+
+.cl-page .eyebrow {
+  color: var(--cl-blue);
+}
+
+.cl-page h2 {
+  font-family: var(--display);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+}
+
+/* "Fig." captions, typewriter style, like a spec sheet */
+.cl-fig {
+  font-family: var(--cl-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  margin-top: 1rem;
+  opacity: 0.7;
+}
+
+/* perforated tear lines between sections */
+.cl-story,
+.cl-gift,
+.cl-journey,
+.cl-results {
+  position: relative;
+}
+
+.cl-story::before,
+.cl-gift::before,
+.cl-journey::before,
+.cl-results::before {
+  background: radial-gradient(circle, rgba(22, 32, 90, 0.35) 1.4px, transparent 1.6px) 0 50% / 12px 6px repeat-x;
+  content: "";
+  height: 6px;
+  left: var(--cl-gutter);
+  position: absolute;
+  right: var(--cl-gutter);
+  top: 0;
+}
+
+/* ---- hero: the mailer on the desk ---- */
+/* Lit like a product shoot on a paper sweep: one soft key light from the
+   upper left (same direction as the 3D scene's light), a faint shadow from
+   window blinds falling across the backdrop, and a fine paper grain. All
+   static CSS (the grain is a tiny inline SVG), so it costs nothing per frame. */
+.cl-hero {
+  align-items: center;
+  background:
+    /* the pool of light behind the box */
+    radial-gradient(ellipse 34% 42% at 66% 44%, rgba(255, 251, 245, 0.9), rgba(255, 251, 245, 0) 72%),
+    /* the sweep falls slightly into shade toward the bottom and the far side */
+    linear-gradient(176deg, rgba(70, 45, 25, 0) 55%, rgba(70, 45, 25, 0.06)),
+    linear-gradient(90deg, rgba(70, 45, 25, 0.035), rgba(70, 45, 25, 0) 30%),
+    var(--cl-desk);
+  display: grid;
+  isolation: isolate;
+  gap: 2rem 4vw;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  min-height: 100svh;
+  overflow: hidden;
+  padding: 6.5rem var(--cl-gutter) 3.5rem;
+  position: relative;
+}
+
+/* window-blind shadow: soft bands, only around the box, fading out */
+.cl-hero::before {
+  background: repeating-linear-gradient(
+    118deg,
+    rgba(70, 45, 25, 0) 0,
+    rgba(70, 45, 25, 0.075) 1.8rem,
+    rgba(70, 45, 25, 0) 3.6rem,
+    rgba(70, 45, 25, 0) 7.4rem
+  );
+  content: "";
+  inset: 0;
+  -webkit-mask-image: radial-gradient(ellipse 40% 52% at 72% 38%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(ellipse 40% 52% at 72% 38%, #000 10%, transparent 78%);
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+/* paper: a fine grain plus a faint, uneven tone */
+.cl-hero::after {
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .33 0 0 0 0 .26 0 0 0 0 .19 0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='700' height='700'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='.006' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .22 0'/></filter><rect width='100%' height='100%' filter='url(%23m)'/></svg>");
+  content: "";
+  inset: 0;
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+
+.cl-hero-text {
+  position: relative;
+  z-index: 2;
+}
+
+.cl-hero h1 {
+  font-family: var(--display);
+  font-size: clamp(3rem, 6.4vw, 7rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+  margin: 1.5rem 0 1.75rem;
+}
+
+.cl-hero h1 span {
+  color: var(--cl-sky);
+  display: block;
+  font-style: italic;
+  margin-left: 0.4em;
+}
+
+.cl-lede {
+  font-family: var(--display);
+  font-size: clamp(1.3rem, 2.1vw, 2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  max-width: 28rem;
+}
+
+/* the postmark sits on the desk behind everything */
+.cl-postmark {
+  bottom: 7%;
+  color: var(--cl-navy);
+  fill: none;
+  left: var(--cl-gutter);
+  opacity: 0.16;
+  pointer-events: none;
+  position: absolute;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  width: clamp(11rem, 20vw, 17rem);
+}
+
+.cl-postmark text {
+  fill: currentColor;
+  font-family: var(--cl-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  stroke: none;
+}
+
+.cl-postmark .cl-postmark-mid {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.cl-postmark .cl-postmark-small {
+  font-size: 8px;
+  letter-spacing: 0.3em;
+}
+
+.cl-stage {
+  margin-inline: auto;
+  max-width: 50rem;
+  position: relative;
+  width: 100%;
+}
+
+/* print crop marks at the corners of the stage */
+.cl-crops i {
+  height: 1.4rem;
+  pointer-events: none;
+  position: absolute;
+  width: 1.4rem;
+}
+
+.cl-crops i::before,
+.cl-crops i::after {
+  background: rgba(22, 32, 90, 0.4);
+  content: "";
+  position: absolute;
+}
+
+.cl-crops i::before { height: 1px; width: 100%; }
+.cl-crops i::after { height: 100%; width: 1px; }
+.cl-crops i:nth-child(1) { left: -0.6rem; top: -0.6rem; }
+.cl-crops i:nth-child(1)::before { bottom: 0; }
+.cl-crops i:nth-child(1)::after { right: 0; }
+.cl-crops i:nth-child(2) { right: -0.6rem; top: -0.6rem; }
+.cl-crops i:nth-child(2)::before { bottom: 0; }
+.cl-crops i:nth-child(3) { bottom: -0.6rem; left: -0.6rem; }
+.cl-crops i:nth-child(3)::after { right: 0; }
+.cl-crops i:nth-child(4) { bottom: -0.6rem; right: -0.6rem; }
+
+.cl-box-button {
+  aspect-ratio: 4 / 3;
+  background: none;
+  border: 0;
+  border-radius: 1.5rem;
+  display: block;
+  padding: 0;
+  position: relative;
+  width: 100%;
+}
+
+.cl-box-button:focus-visible {
+  outline: 3px solid var(--cl-sky);
+  outline-offset: 4px;
+}
+
+.cl-box-closed,
+.cl-box-open-photo {
+  filter: drop-shadow(0 1.6rem 1.4rem rgba(40, 30, 25, 0.25));
+  height: 100%;
+  inset: 0;
+  object-fit: contain;
+  padding: 6% 10%;
+  position: absolute;
+  width: 100%;
+}
+
+/* the 3D canvas reaches above the button so the open lid never clips */
+.cl-box-3d {
+  bottom: 0;
+  left: -8%;
+  pointer-events: none;
+  position: absolute;
+  right: -8%;
+  top: -22%;
+}
+
+.cl-box-open-photo,
+.cl-box-3d {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.cl-box-3d canvas {
+  display: block;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* a paper tag tied on with string: "Open me" */
+.cl-open-tag {
+  background: #fffaf2;
+  border: 1px solid rgba(22, 32, 90, 0.25);
+  border-radius: 0.35rem 0.35rem 0.35rem 1.2rem;
+  box-shadow: 0 0.6rem 1.2rem -0.6rem rgba(22, 32, 90, 0.45);
+  color: var(--cl-navy);
+  font-family: "Caveat", cursive;
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  left: 58%;
+  line-height: 1;
+  padding: 0.5rem 1rem 0.55rem 1.4rem;
+  pointer-events: none;
+  position: absolute;
+  top: 12%;
+}
+
+.cl-open-tag::before {
+  background: rgba(22, 32, 90, 0.5);
+  content: "";
+  height: 2.2rem;
+  left: 0.9rem;
+  position: absolute;
+  top: -2.1rem;
+  width: 1px;
+}
+
+.cl-open-tag::after {
+  background: var(--cl-desk);
+  border: 1px solid rgba(22, 32, 90, 0.3);
+  border-radius: 50%;
+  content: "";
+  height: 0.45rem;
+  left: 0.65rem;
+  position: absolute;
+  top: 0.45rem;
+  width: 0.45rem;
+}
+
+.cl-fig--box {
+  bottom: -2.1rem;
+  left: 0;
+  margin: 0;
+  position: absolute;
+  transition: opacity 300ms ease;
+}
+
+/* once it's open the pieces label themselves; the caption steps aside */
+.cl-stage.is-open .cl-fig--box {
+  opacity: 0;
+}
+
+.cl-repack {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  color: var(--cl-navy);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  left: 50%;
+  letter-spacing: 0.14em;
+  min-height: 2.75rem;
+  padding: 0.6rem 0 0.2rem;
+  position: absolute;
+  text-transform: uppercase;
+  top: 100%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+/* the pieces settle around the open box */
+.cl-pieces {
+  inset: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.cl-piece {
+  pointer-events: auto;
+  position: absolute;
+  z-index: 2;
+}
+
+.cl-piece--organizer { --r: -6deg; bottom: 0; left: -2%; width: 27%; }
+.cl-piece--brochure { --r: -4deg; left: -6%; top: 6%; width: 38%; }
+.cl-piece--postcard { --r: 5deg; bottom: 2%; right: -3%; width: 29%; }
+
+.cl-piece a,
+.cl-piece-float {
+  display: block;
+}
+
+.cl-piece-card {
+  border-radius: 0.5rem;
+  display: block;
+  transform: rotate(var(--r));
+  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cl-piece--brochure .cl-piece-card,
+.cl-piece--postcard .cl-piece-card {
+  box-shadow: 0 1.4rem 2.2rem -1rem rgba(20, 25, 60, 0.55);
+  overflow: hidden;
+}
+
+.cl-piece--organizer .cl-piece-card {
+  filter: drop-shadow(0 1rem 1rem rgba(60, 30, 15, 0.35));
+}
+
+.cl-piece-card img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.cl-piece a:hover .cl-piece-card,
+.cl-piece a:focus-visible .cl-piece-card {
+  transform: rotate(0deg) translateY(-6px) scale(1.04);
+}
+
+.cl-piece a:focus-visible {
+  border-radius: 0.6rem;
+  outline: 3px solid var(--cl-sky);
+  outline-offset: 6px;
+}
+
+.cl-piece-tag {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+}
+
+/* ---- story ---- */
+.cl-story {
+  display: grid;
+  gap: 3rem 6vw;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: var(--cl-section) var(--cl-gutter);
+}
+
+.cl-story h2 {
+  font-size: clamp(1.9rem, 3.4vw, 3.2rem);
+  margin: 0 0 1.25rem;
+}
+
+.cl-story article > p {
+  line-height: 1.7;
+  max-width: 34rem;
+}
+
+/* ---- lenders: brochure + postcard ---- */
+.cl-lenders {
+  background: var(--cl-navy);
+  color: #f4f6ff;
+  padding: var(--cl-section) var(--cl-gutter);
+}
+
+.cl-lenders h2,
+.cl-gift h2,
+.cl-journey h2 {
+  font-size: clamp(2.2rem, 4.4vw, 4.4rem);
+  margin: 0 0 1.25rem;
+}
+
+.cl-lenders-head > p {
+  line-height: 1.7;
+  max-width: 38rem;
+  opacity: 0.85;
+}
+
+.cl-lender-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 2rem 0 clamp(2.5rem, 5vw, 3.5rem);
+}
+
+/* lender switcher, styled like an Apple segmented control: one frosted
+   track, the chosen lender in solid white */
+.cl-lender-picker {
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.6rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  gap: 0.25rem !important;
+  max-width: max-content;
+  padding: 0.3rem;
+}
+
+.cl-lender-picker button {
+  background: transparent;
+  border: 0;
+  border-radius: 1.3rem;
+  color: inherit;
+  display: inline-flex;
+  flex-direction: column;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  justify-content: center;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  min-height: 3rem;
+  padding: 0.45rem 1.15rem;
+  transition:
+    background 250ms ease,
+    box-shadow 250ms ease,
+    color 250ms ease,
+    transform 160ms ease;
+}
+
+.cl-lender-picker small {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  opacity: 0.6;
+}
+
+.cl-lender-picker button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cl-lender-picker button:active {
+  transform: scale(0.96);
+}
+
+.cl-lender-picker button[aria-pressed="true"] {
+  background: #fff;
+  box-shadow: 0 0.35rem 1rem -0.4rem rgba(0, 0, 0, 0.5);
+  color: var(--cl-navy);
+}
+
+.cl-lender-picker button[aria-pressed="true"] small {
+  opacity: 0.55;
+}
+
+.cl-lender-picker button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.cl-lender-stage {
+  align-items: start;
+  display: grid;
+  gap: 4rem 5vw;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.75fr);
+}
+
+.cl-material {
+  margin: 0;
+  min-width: 0;
+}
+
+.cl-material:focus {
+  outline: none;
+}
+
+.cl-lenders .cl-fig {
+  text-align: center;
+}
+
+/* phones: the real artwork, flat and sharp */
+.cl-flat {
+  display: grid;
+  gap: 1rem;
+}
+
+.cl-flat img {
+  border-radius: 0.35rem;
+  box-shadow: 0 1rem 2rem -1rem rgba(0, 0, 0, 0.6);
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+/* flipbook: two leaves turning on a spine */
+.cl-fb-stage {
+  cursor: grab;
+  perspective: 2200px;
+  position: relative;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.cl-fb-stage:active {
+  cursor: grabbing;
+}
+
+.cl-fb-stage:focus-visible {
+  border-radius: 0.5rem;
+  outline: 2px solid var(--cl-sky);
+  outline-offset: 8px;
+}
+
+.cl-fb-book {
+  aspect-ratio: 2000 / 688;
+  margin: 0 auto;
+  position: relative;
+  transform-style: preserve-3d;
+  width: 100%;
+}
+
+.cl-fb-spine {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0.25) 50%, rgba(0, 0, 0, 0) 54%);
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 30;
+}
+
+.cl-fb-cast {
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45), transparent 70%);
+  bottom: -8%;
+  height: 16%;
+  left: 20%;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 20%;
+}
+
+.cl-fb-leaf {
+  height: 100%;
+  left: 50%;
+  position: absolute;
+  top: 0;
+  transform-origin: 0% 50%;
+  transform-style: preserve-3d;
+  width: 50%;
+}
+
+.cl-fb-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #fff;
+  box-shadow: 0 1.2rem 2.4rem -1rem rgba(0, 0, 0, 0.55);
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.cl-fb-face--back {
+  transform: rotateY(180deg);
+}
+
+.cl-fb-img {
+  display: block;
+  height: 100%;
+  max-width: none;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 200%;
+}
+
+.cl-fb-img--left { left: 0; }
+.cl-fb-img--right { left: -100%; }
+
+.cl-fb-shade {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.05) 60%, rgba(255, 255, 255, 0.08));
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.cl-fb-face--back .cl-fb-shade {
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.05) 60%, rgba(255, 255, 255, 0.08));
+}
+
+/* Controls, Apple-style: frosted glass capsules, thin chevrons, sentence
+   case, a soft press when tapped, and dots for where you are. */
+.cl-fb-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 2.25rem;
+}
+
+.cl-fb-pager,
+.cl-fb-enlarge {
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0.75rem 2rem -1rem rgba(0, 0, 0, 0.6);
+}
+
+.cl-fb-pager {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+}
+
+.cl-fb-pager button,
+.cl-fb-enlarge {
+  align-items: center;
+  border: 0;
+  color: inherit;
+  display: inline-flex;
+  font: inherit;
+  justify-content: center;
+  transition:
+    background 200ms ease,
+    opacity 200ms ease,
+    transform 160ms ease;
+}
+
+.cl-fb-pager button {
+  background: transparent;
+  border-radius: 50%;
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.cl-fb-pager button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.cl-fb-pager button:not(:disabled):active,
+.cl-fb-enlarge:active {
+  transform: scale(0.94);
+}
+
+.cl-fb-pager button:disabled {
+  opacity: 0.28;
+}
+
+.cl-fb-pager svg,
+.cl-fb-enlarge svg {
+  fill: none;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 1.15rem;
+}
+
+.cl-fb-where {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 6.5rem;
+}
+
+.cl-fb-where > span:first-child {
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cl-fb-dots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.cl-fb-dots i {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  height: 0.3rem;
+  transition:
+    background 300ms ease,
+    width 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: 0.3rem;
+}
+
+.cl-fb-dots i.is-on {
+  background: #fff;
+  width: 1rem;
+}
+
+.cl-fb-enlarge {
+  font-size: 0.86rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+  min-height: 3.1rem;
+  padding: 0 1.25rem 0 1.05rem;
+}
+
+.cl-fb-enlarge:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cl-fb-pager button:focus-visible,
+.cl-fb-enlarge:focus-visible {
+  outline: 2px solid var(--cl-sky);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-fb-pager button:active,
+  .cl-fb-enlarge:active {
+    transform: none;
+  }
+}
+
+/* postcard: a two-sided card that flips */
+.cl-postcard {
+  background: none;
+  border: 0;
+  color: inherit;
+  display: block;
+  font: inherit;
+  padding: 0;
+  perspective: 1400px;
+  width: 100%;
+}
+
+.cl-pc-tilt {
+  display: block;
+  transform-style: preserve-3d;
+}
+
+.cl-pc-card {
+  aspect-ratio: 1300 / 812;
+  display: block;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.cl-pc-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 0.45rem;
+  box-shadow: 0 1.4rem 2.4rem -1rem rgba(0, 0, 0, 0.6);
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.cl-pc-face--back {
+  transform: rotateY(180deg);
+}
+
+.cl-pc-face img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.cl-pc-hint {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 1.2rem;
+  opacity: 0.6;
+  text-align: center;
+  transition: opacity 200ms ease;
+}
+
+.cl-postcard:hover .cl-pc-hint {
+  opacity: 1;
+}
+
+.cl-postcard:focus-visible {
+  border-radius: 0.5rem;
+  outline: 2px solid var(--cl-sky);
+  outline-offset: 8px;
+}
+
+/* ---- the gift: initials embossed right on the photo ---- */
+.cl-gift {
+  align-items: center;
+  background: #f5efe7;
+  display: grid;
+  gap: 3rem 6vw;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  padding: var(--cl-section) var(--cl-gutter);
+}
+
+.cl-gift:focus {
+  outline: none;
+}
+
+.cl-gift-copy > p {
+  line-height: 1.7;
+  max-width: 28rem;
+}
+
+.cl-gift-field {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  max-width: 20rem;
+}
+
+.cl-gift-field span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cl-gift-field input {
+  background: #fff;
+  border: 1px solid rgba(22, 32, 90, 0.3);
+  border-radius: 0.8rem;
+  color: var(--cl-navy);
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  min-height: 3.5rem;
+  padding: 0.4rem 1rem;
+  text-transform: uppercase;
+  width: 9rem;
+}
+
+.cl-gift-field input:focus-visible {
+  outline: 3px solid var(--cl-sky);
+  outline-offset: 2px;
+}
+
+.cl-gift-photo {
+  margin: 0;
+  max-width: 44rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.cl-gift-frame {
+  container-type: inline-size;
+  display: block;
+  position: relative;
+}
+
+.cl-gift-frame img {
+  display: block;
+  filter: drop-shadow(0 2rem 2rem rgba(60, 30, 15, 0.3));
+  height: auto;
+  width: 100%;
+}
+
+/* sized and placed to match the original foil stamp on this photo */
+.cl-monogram {
+  background: linear-gradient(180deg, #fbe3a2 0%, #efc56f 55%, #d9a650 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0.08cqw 0 rgba(70, 30, 10, 0.55)) blur(0.15px);
+  font-family: "Times New Roman", Georgia, serif;
+  font-size: 2.95cqw;
+  font-weight: 700;
+  left: 76.3%;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  pointer-events: none;
+  position: absolute;
+  top: 78.45%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+/* ---- desk to mailroom ---- */
+.cl-journey {
+  align-items: start;
+  display: grid;
+  gap: 2rem 4vw;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: var(--cl-section) var(--cl-gutter);
+}
+
+.cl-journey h2 {
+  grid-column: 1 / -1;
+}
+
+.cl-journey figure {
+  background: #fff;
+  border-radius: 0.4rem;
+  box-shadow: 0 1.5rem 2.5rem -1.25rem rgba(20, 25, 60, 0.45);
+  margin: 0;
+  min-width: 0;
+  padding: 0.8rem 0.8rem 0;
+  transform: rotate(-1.5deg);
+}
+
+.cl-journey figure:nth-of-type(2) {
+  margin-top: 3rem;
+  transform: rotate(1.5deg);
+}
+
+.cl-journey img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.cl-journey figcaption {
+  font-family: "Caveat", cursive;
+  font-size: 1.5rem;
+  padding: 0.5rem 0.2rem 0.7rem;
+}
+
+/* ---- results: one big number, two supporting, then the takeaway ---- */
+.cl-results {
+  column-gap: 6vw;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  padding: var(--cl-section) var(--cl-gutter);
+}
+
+.cl-result-lead,
+.cl-result-side > div {
+  min-width: 0;
+}
+
+.cl-result-lead strong,
+.cl-result-side strong {
+  display: block;
+  font-family: var(--display);
+  /* lining figures, so no digit dips below the line into its label */
+  font-feature-settings: "lnum" 1;
+  font-variant-numeric: lining-nums;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 0.85;
+}
+
+.cl-result-lead strong {
+  font-size: clamp(5rem, 17vw, 16rem);
+}
+
+.cl-result-lead span,
+.cl-result-side span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-top: 1rem;
+  max-width: 18rem;
+  text-transform: uppercase;
+}
+
+.cl-result-side {
+  align-self: end;
+  display: grid;
+}
+
+.cl-result-side > div {
+  border-top: 1px solid rgba(22, 32, 90, 0.25);
+  padding: 1.5rem 0 2rem;
+}
+
+.cl-result-side strong {
+  color: var(--cl-blue);
+  font-size: clamp(3rem, 6vw, 5.5rem);
+}
+
+.cl-outcome {
+  border-top: 2px solid var(--cl-sky);
+  font-family: var(--display);
+  font-size: clamp(1.35rem, 2.4vw, 2.4rem);
+  font-style: italic;
+  grid-column: 1 / -1;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  max-width: 54rem;
+  padding-top: 2rem;
+}
+
+.cl-page .next-project {
+  background: var(--cl-sky);
+  border-top-color: var(--cl-navy);
+}
+
+.cl-page .next-project:hover {
+  background: #fff;
+}
+
+/* ---- below 1100px: one column; the box sits under the title ---- */
+@media (max-width: 1100px) {
+  .cl-hero {
+    /* the box sits lower and centered now, so the light follows it */
+    background:
+      radial-gradient(ellipse 60% 26% at 52% 70%, rgba(255, 251, 245, 0.9), rgba(255, 251, 245, 0) 72%),
+      linear-gradient(176deg, rgba(70, 45, 25, 0) 55%, rgba(70, 45, 25, 0.06)),
+      var(--cl-desk);
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-bottom: 5rem;
+  }
+
+  .cl-hero::before {
+    -webkit-mask-image: radial-gradient(ellipse 60% 28% at 56% 66%, #000 10%, transparent 78%);
+    mask-image: radial-gradient(ellipse 60% 28% at 56% 66%, #000 10%, transparent 78%);
+  }
+
+  .cl-hero-text {
+    max-width: 40rem;
+  }
+
+  .cl-postmark {
+    bottom: auto;
+    left: auto;
+    right: 4%;
+    top: 5.5rem;
+  }
+
+  .cl-stage {
+    max-width: 44rem;
+  }
+
+  /* the box now spans the width, so the pieces stay inside its frame */
+  .cl-piece--organizer { left: 0; }
+  .cl-piece--brochure { left: 0; }
+  .cl-piece--postcard { right: 0; }
+
+  .cl-lender-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .cl-material--postcard {
+    margin-inline: auto;
+    max-width: 30rem;
+    width: 100%;
+  }
+}
+
+/* ---- 900px and down: stack the two-column sections ---- */
+@media (max-width: 900px) {
+  .cl-story,
+  .cl-gift,
+  .cl-results {
+    grid-template-columns: 1fr;
+  }
+
+  .cl-result-side {
+    margin-top: 2.5rem;
+  }
+
+  .cl-material--postcard {
+    max-width: none;
+  }
+}
+
+/* ---- phones: the pieces land in a row under the box ---- */
+@media (max-width: 700px) {
+  .cl-hero {
+    gap: 1rem;
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+  }
+
+  .cl-hero h1 {
+    margin: 1rem 0 1.25rem;
+  }
+
+  .cl-postmark {
+    right: -2.5rem;
+    top: 4.5rem;
+    width: 10rem;
+  }
+
+  .cl-stage {
+    margin-top: 1.5rem;
+  }
+
+  .cl-open-tag {
+    left: 60%;
+    top: 8%;
+  }
+
+  .cl-pieces {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: 1fr 1.3fr 1fr;
+    margin-top: 1.5rem;
+    position: static;
+  }
+
+  /* no empty row before the box is opened */
+  .cl-stage:not(.is-open) .cl-pieces {
+    display: none;
+  }
+
+  .cl-piece {
+    inset: auto;
+    position: relative;
+    width: auto;
+  }
+
+  .cl-piece-tag {
+    font-size: 0.58rem;
+  }
+
+  .cl-repack {
+    display: block;
+    margin: 0.75rem auto 0;
+    position: static;
+    transform: none;
+  }
+
+  .cl-fig--box {
+    bottom: auto;
+    margin-top: 1.1rem;
+    padding-left: 1.1rem;
+    position: static;
+  }
+
+  .cl-journey {
+    grid-template-columns: 1fr;
+  }
+
+  .cl-journey figure:nth-of-type(2) {
+    margin-top: 0;
+  }
+
+  /* artwork goes edge to edge so it stays as large (and sharp) as possible */
+  .cl-flat {
+    margin-inline: calc(var(--cl-gutter) * -1);
+  }
+
+  .cl-flat img {
+    border-radius: 0;
+  }
+}
+
+/* ---- Commercial Lending type refinements ----
+   One clear scale: display headline → section headings → story headings →
+   body. Cormorant only where it's large enough to hold its hairlines;
+   anything small is Manrope. */
+
+/* section headings: bigger, so the page scans in clear steps */
+.cl-lenders h2,
+.cl-gift h2,
+.cl-journey h2 {
+  font-size: clamp(2.5rem, 5.2vw, 5.25rem);
+  letter-spacing: -0.05em;
+  line-height: 0.98;
+}
+
+/* light-on-navy hairlines thin out, so this heading sits one weight heavier */
+.cl-lenders h2 {
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+/* story headings are a step below sections, with body text clearly under them */
+.cl-story h2 {
+  font-size: clamp(1.9rem, 3vw, 2.9rem);
+  line-height: 1.06;
+}
+
+.cl-story article > p,
+.cl-gift-copy > p,
+.cl-lenders-head > p {
+  color: rgba(22, 32, 90, 0.82);
+  font-size: 1.0625rem;
+}
+
+.cl-lenders-head > p {
+  color: rgba(244, 246, 255, 0.82);
+  opacity: 1;
+}
+
+/* never let the serif get small enough to turn spindly */
+.cl-lede {
+  font-size: clamp(1.4rem, 2.1vw, 2rem);
+  font-weight: 500;
+}
+
+/* the headline number, set tight like a magazine figure */
+.cl-result-lead strong {
+  letter-spacing: -0.075em;
+  line-height: 0.8;
+  margin-left: -0.04em;
+}
+
+.cl-result-side strong {
+  letter-spacing: -0.06em;
+}
+
+/* ---- no widows on the Commercial Lending page ----
+   Short labels split into even lines; running text avoids a lone last word.
+   (motion.ts also joins the last two words of paragraphs and headings.) */
+.cl-page :is(h1, h2, h3, .cl-result-lead span, .cl-result-side span, .cl-piece-tag, .cl-fig, .cl-open-tag, .cl-gift-field span) {
+  text-wrap: balance;
+}
+
+.cl-page :is(p, figcaption, li, dd) {
+  text-wrap: pretty;
+}
+
+/* project-to-project links: big titles break into even lines, never a lone word */
+.next-project strong,
+.rb-next strong {
+  text-wrap: balance;
+}
+
+/* "Brochure" / "Postcard": short labels that sit above each piece */
+.cl-lenders .cl-material-label {
+  margin: 0 0 1.25rem;
+}

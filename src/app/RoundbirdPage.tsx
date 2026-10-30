@@ -3,6 +3,7 @@ import { Link } from "react-router"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Arrow, Media } from "./Media"
+import { landCard } from "./cardFlip"
 import { useMagnetic } from "./interactions"
 import { useTextMotion } from "./motion"
 import { media, type Project } from "./projectData"
@@ -81,6 +82,8 @@ export default function RoundbirdPage({ project, next }: { project: Project; nex
 
   useTextMotion(root)
   useMagnetic(root)
+  // no matching hero image here, so a clicked card's cover fills the screen and fades
+  useLayoutEffect(() => landCard(null), [])
 
   return (
     <main className="rb-page" ref={root}>
@@ -151,7 +154,7 @@ export default function RoundbirdPage({ project, next }: { project: Project; nex
         <figure className="rb-reveal"><FramedPhoto src="rb-wine.webp" alt="Wine glasses etched with the Roundbird bird mark" trimBorder /></figure>
       </section>
 
-      <Link className="rb-next" to={`/work/${next.slug}`}><span>Next project</span><strong>{next.shortTitle}</strong><Arrow /></Link>
+      <Link className="rb-next" to={`/work/${next.slug}`}><span>Next project</span><strong data-nowidow>{next.shortTitle}</strong><Arrow /></Link>
     </main>
   )
 }

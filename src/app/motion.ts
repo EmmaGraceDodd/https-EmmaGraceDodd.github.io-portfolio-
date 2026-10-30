@@ -44,7 +44,9 @@ export function useTextMotion(scope: RefObject<HTMLElement | null>, dep?: unknow
     const root = scope.current
     if (!root) return
     const originalEndings: Array<[Text, string]> = []
-    root.querySelectorAll("p, dd, figcaption, h2, h3").forEach((el) => {
+    // no widows: the last two words of text blocks are joined with a
+    // non-breaking space (add data-nowidow to cover other short labels)
+    root.querySelectorAll("p, dd, figcaption, h2, h3, [data-nowidow]").forEach((el) => {
       const node = el.lastChild
       if (node?.nodeType !== 3 || !node.textContent || node.textContent.trim().split(/\s+/).length < 3) return
       originalEndings.push([node as Text, node.textContent])

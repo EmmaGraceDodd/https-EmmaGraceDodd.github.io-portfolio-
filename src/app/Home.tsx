@@ -41,6 +41,9 @@ function useCardOpen(slug: string, frameSelector: string, radius: string) {
   const navigate = useNavigate()
   return (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    // Commercial Lending opens on a 3D box that doesn't match its card photo,
+    // so it gets the page's own fade-in instead of the cover flying over
+    if (slug === "commercial-lending") return
     if (!launchCard(e.currentTarget.querySelector<HTMLElement>(frameSelector), radius)) return
     e.preventDefault()
     navigate(`/work/${slug}`)

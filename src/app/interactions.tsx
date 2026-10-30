@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type RefObject } from "react"
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore, type RefObject } from "react"
 import gsap from "gsap"
 import { ScrollToPlugin } from "gsap/ScrollToPlugin"
 
@@ -12,6 +12,19 @@ gsap.registerPlugin(ScrollToPlugin)
 
 export const FINE_POINTER = "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)"
 export const MOTION_OK = "(prefers-reduced-motion: no-preference)"
+
+/** True while a media query matches; re-renders when it changes (e.g. resizing). */
+export function useMedia(query: string) {
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(query)
+      list.addEventListener("change", onChange)
+      return () => list.removeEventListener("change", onChange)
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  )
+}
 
 export function useMagnetic(scope: RefObject<HTMLElement | null>, dep?: unknown) {
   useLayoutEffect(() => {

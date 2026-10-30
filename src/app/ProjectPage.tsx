@@ -9,6 +9,7 @@ import { getProject, projects, type GalleryItem } from "./projectData"
 // The Treasury page brings in GSAP, so it only loads when someone opens it.
 const TreasuryPage = lazy(() => import("./TreasuryPage"))
 const RoundbirdPage = lazy(() => import("./RoundbirdPage"))
+const CommercialPage = lazy(() => import("./CommercialPage"))
 
 function GalleryFigure({ item, index }: { item: GalleryItem; index: number }) {
   const pieces = item.group ?? [item]
@@ -64,10 +65,9 @@ function ProjectView() {
   useMagnetic(pageRef, slug)
 
   // If a homepage card was clicked, fly its cover onto this page's hero image.
-  // The custom pages (Treasury, Roundbird) have no matching image, so the
-  // cover fills the screen and fades instead.
+  // The custom pages are loaded separately and land the cover themselves.
   useLayoutEffect(() => {
-    landCard(pageRef.current?.querySelector(".case-hero-image > *") ?? null)
+    if (pageRef.current) landCard(pageRef.current.querySelector(".case-hero-image > *"))
   }, [slug])
 
   useEffect(() => {
@@ -85,6 +85,13 @@ function ProjectView() {
 
   const projectIndex = projects.findIndex((item) => item.slug === project.slug)
   const nextProject = projects[(projectIndex + 1) % projects.length]
+
+  if (project.slug === "commercial-lending")
+    return (
+      <Suspense fallback={<main className="case-page cl-page"><SiteNav variant="project" /></main>}>
+        <CommercialPage project={project} next={nextProject} key={project.slug} />
+      </Suspense>
+    )
 
   if (project.slug === "roundbird-coffee")
     return <Suspense fallback={<main className="rb-page"><SiteNav variant="project" /></main>}><RoundbirdPage project={project} next={nextProject} /></Suspense>
