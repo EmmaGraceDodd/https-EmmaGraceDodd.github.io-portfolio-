@@ -101,32 +101,74 @@ export function Home() {
             repeat: -1,
           })
         })
-        if (!reaction) return
-        const rotateTo = gsap.quickTo(reaction, "rotation", { duration: 0.3, ease: "power2.out" })
-        const shiftTo = gsap.quickTo(reaction, "x", { duration: 0.3, ease: "power2.out" })
-        const settle = gsap.to(reaction, { rotation: 0, x: 0, duration: 1.8, ease: "elastic.out(1, 0.35)", paused: true })
+        const holder = reaction?.querySelector<HTMLElement>(".badge-holder")
+        const gloss = reaction?.querySelector<HTMLElement>(".badge-gloss")
+        if (!reaction || !holder || !gloss) return
+
+        // The swing is a damped spring run on GSAP's ticker, so a swipe of the
+        // mouse gives the badge a push and it swings back and settles on its
+        // own. The tilt and shine follow the cursor with quickTo.
+        gsap.set(holder, { transformPerspective: 800 })
+        const tiltX = gsap.quickTo(holder, "rotationX", { duration: 0.6, ease: "power3.out" })
+        const tiltY = gsap.quickTo(holder, "rotationY", { duration: 0.6, ease: "power3.out" })
+        const shine = gsap.quickTo(gloss, "xPercent", { duration: 0.8, ease: "power3.out" })
+        const setAngle = gsap.quickSetter(reaction, "rotation", "deg")
+        let angle = 0
+        let spin = 0
         let previousX: number | null = null
+        let running = false
+        const step = (_time: number, deltaMs: number) => {
+          const dt = Math.min(deltaMs, 32) / 1000
+          spin += (-90 * angle - 5 * spin) * dt
+          angle = gsap.utils.clamp(-16, 16, angle + spin * dt)
+          setAngle(angle)
+          if (Math.abs(angle) < 0.02 && Math.abs(spin) < 0.02) {
+            setAngle(0)
+            gsap.ticker.remove(step)
+            running = false
+          }
+        }
+        const nudge = (amount: number) => {
+          spin = gsap.utils.clamp(-120, 120, spin + amount)
+          if (!running) {
+            gsap.ticker.add(step)
+            running = true
+          }
+        }
+        const onEnter = (event: PointerEvent) => {
+          if (event.pointerType !== "mouse") return
+          previousX = event.clientX
+          gsap.to(holder, { scale: 1.04, duration: 0.5, ease: "back.out(2)", overwrite: "auto" })
+        }
         const onMove = (event: PointerEvent) => {
           if (event.pointerType !== "mouse") return
-          settle.pause()
-          const rect = reaction.getBoundingClientRect()
-          const velocity = previousX === null ? 0 : event.clientX - previousX
+          // measure against the card, which rotates only a little, not the swinging rig
+          const rect = holder.getBoundingClientRect()
+          const px = gsap.utils.clamp(-0.5, 0.5, (event.clientX - rect.left) / rect.width - 0.5)
+          const py = gsap.utils.clamp(-0.5, 0.5, (event.clientY - rect.top) / rect.height - 0.5)
+          tiltY(px * 24)
+          tiltX(py * -16)
+          shine(px * 60)
+          if (previousX !== null) nudge((previousX - event.clientX) * 1.6)
           previousX = event.clientX
-          const push = gsap.utils.clamp(-12, 12, ((event.clientX - rect.left) / rect.width - 0.5) * 16 + velocity * 0.2)
-          rotateTo(push)
-          shiftTo(push * 0.5)
         }
-        const onLeave = () => {
+        const onLeave = (event: PointerEvent) => {
+          if (event.pointerType !== "mouse") return
           previousX = null
-          rotateTo.tween.pause()
-          shiftTo.tween.pause()
-          settle.invalidate().restart()
+          tiltX(0)
+          tiltY(0)
+          shine(0)
+          gsap.to(holder, { scale: 1, duration: 0.7, ease: "power3.out", overwrite: "auto" })
         }
+        reaction.addEventListener("pointerenter", onEnter)
         reaction.addEventListener("pointermove", onMove)
         reaction.addEventListener("pointerleave", onLeave)
         return () => {
+          gsap.ticker.remove(step)
+          reaction.removeEventListener("pointerenter", onEnter)
           reaction.removeEventListener("pointermove", onMove)
           reaction.removeEventListener("pointerleave", onLeave)
+          gsap.set([reaction, holder, gloss], { clearProps: "transform" })
         }
       })
     }, hero)
